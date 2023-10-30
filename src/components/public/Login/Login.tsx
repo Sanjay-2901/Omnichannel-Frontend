@@ -1,6 +1,8 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { httpRequest } from '../../../utils/axios-utils';
+import { useAuthContext } from '../../../utils/auth/auth';
+import { useNavigate } from 'react-router-dom';
 
 type LoginFormData = {
   email: string;
@@ -15,13 +17,30 @@ const Login = () => {
     },
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const authContext = useAuthContext();
+  const navigate = useNavigate();
+
   const { errors } = methods.formState;
 
   const submitClickHandler: SubmitHandler<LoginFormData> = (
-    data: LoginFormData
+    loginFormData: LoginFormData
   ) => {
-    console.log(data);
-    httpRequest({ url: 'auth/sign_in', method: 'post', data: data });
+    setIsLoading(true);
+    httpRequest({
+      url: 'auth/sign_in',
+      method: 'post',
+      data: loginFormData,
+    })
+      .then((response) => {
+        authContext?.setLoggedInUser(response.data.data);
+        setIsLoading(false);
+        navigate('/');
+      })
+      .catch((error) => {
+        console.log(error);
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -69,8 +88,20 @@ const Login = () => {
             />
             <small className='text-danger'>{errors.password?.message}</small>
           </div>
-          <button type='submit' className='btn btn-primary mt-3'>
-            Sign in
+          <button
+            type='submit'
+            className='btn btn-primary mt-4 d-flex align-items-center'
+            disabled={isLoading}
+          >
+            {isLoading ? 'Signing in' : 'Sign in'}
+            {isLoading && (
+              <span className='ms-2'>
+                <div
+                  className='spinner-border spinner-border-sm'
+                  role='status'
+                ></div>
+              </span>
+            )}
           </button>
         </form>
       </div>
