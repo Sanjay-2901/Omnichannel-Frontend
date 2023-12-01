@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { AuthProviderProps } from '../../../shared/models/shared.model';
 import { useAuthContext } from '../../../utils/auth/auth';
+import { ChildrenComponentProps } from '../../../shared/models/shared.model';
 
-export const RequireAuth: React.FC<AuthProviderProps> = ({ children }) => {
+export const RequireAuth: React.FC<ChildrenComponentProps> = ({ children }) => {
   const authContext = useAuthContext();
 
   if (!authContext?.getUserToken()) {

@@ -32,6 +32,6 @@ interface Accounts {
   status: string;
 }
 
-export type AuthProviderProps = {
+export type ChildrenComponentProps = {
   children: ReactElement;
 };
