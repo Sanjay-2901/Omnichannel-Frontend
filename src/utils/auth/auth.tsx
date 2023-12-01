@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import {
-  AuthProviderProps,
+  ChildrenComponentProps,
   LoginResponse,
 } from '../../shared/models/shared.model';
 
@@ -13,7 +13,9 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<ChildrenComponentProps> = ({
+  children,
+}) => {
   const [userDetails, setUserDetails] = useState<LoginResponse | {}>({});
 
   const setLoggedInUser = (loginResponse: LoginResponse) => {

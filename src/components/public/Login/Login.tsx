@@ -45,65 +45,67 @@ const Login = () => {
 
   return (
     <>
-      <div className='card w-50 p-3 shadow-lg position-absolute top-50 start-50 translate-middle'>
-        <h3 className='text-center mb-3'>Sign In</h3>
-        <form
-          noValidate
-          className='px-3'
-          onSubmit={methods.handleSubmit(submitClickHandler)}
-        >
-          <div className='form-group'>
-            <label htmlFor='email'>Email address</label>
-            <input
-              {...methods.register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/,
-                  message: 'Enter a valid email address',
-                },
-              })}
-              type='email'
-              className='form-control mt-1'
-              id='email'
-              placeholder='Enter your email'
-            />
-            {!errors.email ? (
-              <small id='emailHelp' className='form-text text-muted'>
-                We'll never share your email with anyone else.
-              </small>
-            ) : (
-              <small className='text-danger'>{errors.email?.message}</small>
-            )}
-          </div>
-          <div className='form-group mt-3'>
-            <label htmlFor='password'>Password</label>
-            <input
-              {...methods.register('password', {
-                required: 'Password is required',
-              })}
-              type='password'
-              className='form-control mt-1'
-              id='password'
-              placeholder='Enter your password'
-            />
-            <small className='text-danger'>{errors.password?.message}</small>
-          </div>
-          <button
-            type='submit'
-            className='btn btn-primary mt-4 d-flex align-items-center'
-            disabled={isLoading}
+      <div className='d-flex justify-content-center align-items-center vh-100'>
+        <div className='card w-50 p-3 shadow-lg'>
+          <h3 className='text-center mb-3'>Sign In</h3>
+          <form
+            noValidate
+            className='px-3'
+            onSubmit={methods.handleSubmit(submitClickHandler)}
           >
-            {isLoading ? 'Signing in' : 'Sign in'}
-            {isLoading && (
-              <span className='ms-2'>
-                <div
-                  className='spinner-border spinner-border-sm'
-                  role='status'
-                ></div>
-              </span>
-            )}
-          </button>
-        </form>
+            <div className='form-group'>
+              <label htmlFor='email'>Email address</label>
+              <input
+                {...methods.register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/,
+                    message: 'Enter a valid email address',
+                  },
+                })}
+                type='email'
+                className='form-control mt-1'
+                id='email'
+                placeholder='Enter your email'
+              />
+              {!errors.email ? (
+                <small id='emailHelp' className='form-text text-muted'>
+                  We'll never share your email with anyone else.
+                </small>
+              ) : (
+                <small className='text-danger'>{errors.email?.message}</small>
+              )}
+            </div>
+            <div className='form-group mt-3'>
+              <label htmlFor='password'>Password</label>
+              <input
+                {...methods.register('password', {
+                  required: 'Password is required',
+                })}
+                type='password'
+                className='form-control mt-1'
+                id='password'
+                placeholder='Enter your password'
+              />
+              <small className='text-danger'>{errors.password?.message}</small>
+            </div>
+            <button
+              type='submit'
+              className='btn btn-primary mt-4 d-flex align-items-center'
+              disabled={isLoading}
+            >
+              {isLoading ? 'Signing in' : 'Sign in'}
+              {isLoading && (
+                <span className='ms-2'>
+                  <div
+                    className='spinner-border spinner-border-sm'
+                    role='status'
+                  ></div>
+                </span>
+              )}
+            </button>
+          </form>
+        </div>
       </div>
     </>
   );
