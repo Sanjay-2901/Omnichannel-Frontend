@@ -33,9 +33,9 @@ const Login = () => {
       data: loginFormData,
     })
       .then((response) => {
-        authContext?.setLoggedInUser(response.data.data);
+        authContext?.setLoggedInUser(response);
         setIsLoading(false);
-        navigate('/');
+        navigate('/conversations');
       })
       .catch((error) => {
         console.log(error);

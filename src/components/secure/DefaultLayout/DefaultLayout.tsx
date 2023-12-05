@@ -6,7 +6,7 @@ const DefaultLayout = ({ children }: ChildrenComponentProps) => {
     <>
       <div className='main-container p-0'>
         <Sidebar />
-        <main>{children}</main>
+        <main className='p-0'>{children}</main>
       </div>
     </>
   );

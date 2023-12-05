@@ -3,12 +3,14 @@ import {
   ChildrenComponentProps,
   LoginResponse,
 } from '../../shared/models/shared.model';
+import { httpRequest } from '../axios-utils';
 
 type AuthContextType = {
-  userDetails: LoginResponse | {} | string;
+  // userDetails: LoginResponse | {} | string;
   setLoggedInUser: (loginResponse: LoginResponse) => any;
   removeLoggedInUser: () => void;
-  getUserToken: () => string | null;
+  getUserToken: () => any | null;
+  getUserDetails: () => LoginResponse | any;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -16,26 +18,49 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<ChildrenComponentProps> = ({
   children,
 }) => {
-  const [userDetails, setUserDetails] = useState<LoginResponse | {}>({});
+  // const [userDetails, setUserDetails] = useState<LoginResponse | {}>({});
 
-  const setLoggedInUser = (loginResponse: LoginResponse) => {
-    console.log('login-response', loginResponse);
-    localStorage.setItem('access_token', loginResponse.access_token);
-    setUserDetails(loginResponse);
-    console.log(userDetails);
+  const setLoggedInUser = (loginResponse: any) => {
+    localStorage.setItem(
+      'authorization_token',
+      loginResponse.headers.authorization
+    );
+    localStorage.setItem('access_token', loginResponse.data.data.access_token);
+    localStorage.setItem(
+      'userDetails',
+      JSON.stringify(loginResponse.data.data)
+    );
+
+    // setUserDetails(loginResponse.data.data);
   };
 
   const removeLoggedInUser = () => {
-    localStorage.removeItem('access_token');
+    httpRequest({
+      url: 'auth/sign_out',
+      method: 'delete',
+    }).then((response) => {
+      console.log(response);
+    });
+    localStorage.clear();
   };
 
   const getUserToken = () => {
     return localStorage.getItem('access_token');
   };
 
+  const getUserDetails = () => {
+    let userDetails = localStorage.getItem('userDetails');
+    if (userDetails) return JSON.parse(userDetails);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ userDetails, setLoggedInUser, removeLoggedInUser, getUserToken }}
+      value={{
+        getUserDetails,
+        setLoggedInUser,
+        removeLoggedInUser,
+        getUserToken,
+      }}
     >
       {children}
     </AuthContext.Provider>

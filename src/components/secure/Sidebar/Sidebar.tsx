@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { FaBars, FaRocketchat, FaUnlock, FaInbox } from 'react-icons/fa';
+import { FaBars, FaRocketchat, FaUnlock } from 'react-icons/fa';
 import { useState } from 'react';
 import './Sidebar.scss';
 import { useAuthContext } from '../../../utils/auth/auth';
@@ -11,11 +11,6 @@ const SideBar = () => {
       path: '/conversations',
       name: 'Conversations',
       icon: <FaRocketchat />,
-    },
-    {
-      path: '/inboxes',
-      name: 'Inboxes',
-      icon: <FaInbox />,
     },
   ];
   const [isOpen, setIsOpen] = useState(false);
