@@ -35,3 +35,9 @@ interface Accounts {
 export type ChildrenComponentProps = {
   children: ReactElement;
 };
+
+export interface DashBoardState {
+  inboxId: number | null;
+  conversationId: number | null;
+  selectedConversationId: number | null;
+}

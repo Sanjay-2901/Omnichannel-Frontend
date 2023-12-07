@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom';
-import { useAuthContext } from '../../../utils/auth/auth';
+import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { ChildrenComponentProps } from '../../../shared/models/shared.model';
 
 export const RequireAuth: React.FC<ChildrenComponentProps> = ({ children }) => {

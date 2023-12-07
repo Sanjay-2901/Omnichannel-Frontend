@@ -1,33 +1,28 @@
 import './App.css';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/public/Login/Login';
-import { AuthProvider } from './utils/auth/auth';
+import { AuthProvider } from './utils/auth/AuthProvider';
 import { RequireAuth } from './components/public/RequireAuth/RequireAuth';
 import UnAuth from './components/public/UnAuth/UnAuth';
 import NotFound from './components/public/NotFound/NotFound';
 import DefaultLayout from './components/secure/DefaultLayout/DefaultLayout';
-import ConversationsPage from './components/secure/ConversationsPage/ConversationsPage';
+import Dashboard from './components/secure/Dashboard/Dashboard';
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route
-          path='/*'
+          path='/'
           element={
             <RequireAuth>
-              <DefaultLayout>
-                <Routes>
-                  <Route path='/' element={<ConversationsPage />} />
-                  <Route
-                    path='/conversations'
-                    element={<ConversationsPage />}
-                  />
-                </Routes>
-              </DefaultLayout>
+              <DefaultLayout />
             </RequireAuth>
           }
-        />
+        >
+          <Route path='' element={<Navigate to='/dashboard' />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+        </Route>
         <Route
           path='/login'
           element={

@@ -2,13 +2,13 @@ import { NavLink } from 'react-router-dom';
 import { FaBars, FaRocketchat, FaUnlock } from 'react-icons/fa';
 import { useState } from 'react';
 import './Sidebar.scss';
-import { useAuthContext } from '../../../utils/auth/auth';
+import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
 const SideBar = () => {
   const menuItems = [
     {
-      path: '/conversations',
+      path: '/dashboard',
       name: 'Conversations',
       icon: <FaRocketchat />,
     },
@@ -44,7 +44,7 @@ const SideBar = () => {
             </div>
           </NavLink>
         ))}
-        <div className='link'>
+        <div className='link cursor-pointer'>
           <div
             className='icon'
             onClick={() => {

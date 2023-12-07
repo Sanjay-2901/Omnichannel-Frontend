@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import {
   ChildrenComponentProps,
   LoginResponse,
@@ -6,7 +6,6 @@ import {
 import { httpRequest } from '../axios-utils';
 
 type AuthContextType = {
-  // userDetails: LoginResponse | {} | string;
   setLoggedInUser: (loginResponse: LoginResponse) => any;
   removeLoggedInUser: () => void;
   getUserToken: () => any | null;
@@ -18,8 +17,6 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<ChildrenComponentProps> = ({
   children,
 }) => {
-  // const [userDetails, setUserDetails] = useState<LoginResponse | {}>({});
-
   const setLoggedInUser = (loginResponse: any) => {
     localStorage.setItem(
       'authorization_token',
@@ -30,8 +27,6 @@ export const AuthProvider: React.FC<ChildrenComponentProps> = ({
       'userDetails',
       JSON.stringify(loginResponse.data.data)
     );
-
-    // setUserDetails(loginResponse.data.data);
   };
 
   const removeLoggedInUser = () => {
