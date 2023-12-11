@@ -28,6 +28,18 @@ const ChatScreen = () => {
 
   useEffect(() => {
     getMessages();
+    if (
+      dashBoardState.receivedMessage?.conversation_id ===
+        dashBoardState.selectedConversationId &&
+      messages
+    ) {
+      setMessages((prevData: any) => {
+        return {
+          ...prevData,
+          payload: [...prevData.payload, dashBoardState.receivedMessage],
+        };
+      });
+    }
   }, [dashBoardState]);
 
   const getMessages = () => {
@@ -95,7 +107,7 @@ const ChatScreen = () => {
         )}
         {messages && (
           <>
-            <div className='flex flex-col p-3 h-full overflow-y-auto'>
+            <div className='flex flex-col p-3 h-full overflow-y-auto scroll-smooth'>
               {messages.payload.map((message: any, index: number) => (
                 <div
                   key={index}
