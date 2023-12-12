@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { IoLogoSnapchat } from 'react-icons/io';
 import { httpRequest } from '../../../utils/axios-utils';
@@ -6,6 +6,7 @@ import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
+import { DashBoardState } from '../../../shared/models/shared.model';
 
 type MessageForm = {
   message: string;
@@ -14,7 +15,7 @@ type MessageForm = {
 const ChatScreen = () => {
   const dashboardContext = useDashboardContext();
   const authContext = useAuthContext();
-  const { dashBoardState } = dashboardContext;
+  const { dashBoardState, updateDashboardState } = dashboardContext;
   const [messages, setMessages] = useState<any>(null);
   const [isMessageSending, setIsMessageSending] = useState(false);
   const accountId = authContext?.getUserDetails().account_id;
@@ -25,6 +26,7 @@ const ChatScreen = () => {
     },
   });
   const { isValid } = methods.formState;
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     getMessages();
@@ -40,7 +42,18 @@ const ChatScreen = () => {
         };
       });
     }
-  }, [dashBoardState]);
+  }, [dashBoardState.selectedConversationId, dashBoardState.receivedMessage]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
 
   const getMessages = () => {
     if (dashBoardState.selectedConversationId) {
@@ -74,6 +87,10 @@ const ChatScreen = () => {
           return { ...prevData, payload: [...prevData.payload, response.data] };
         });
         setIsMessageSending(false);
+        console.log(response);
+        updateDashboardState((prevState: DashBoardState) => {
+          return { ...prevState, postedMessageId: response.data.id };
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -107,7 +124,10 @@ const ChatScreen = () => {
         )}
         {messages && (
           <>
-            <div className='flex flex-col p-3 h-full overflow-y-auto scroll-smooth'>
+            <div
+              className='flex flex-col p-3 h-full overflow-y-auto scroll-smooth'
+              ref={chatContainerRef}
+            >
               {messages.payload.map((message: any, index: number) => (
                 <div
                   key={index}
@@ -115,7 +135,7 @@ const ChatScreen = () => {
                     message.message_type === 0
                       ? 'bg-gray-300 self-start text-dark rounded-r-lg'
                       : 'bg-blue-500 self-end rounded-l-lg'
-                  } p-2 rounded-t-md h-ful`}
+                  } p-2 rounded-t-md h-ful whitespace-normal`}
                 >
                   {message.content}
                 </div>

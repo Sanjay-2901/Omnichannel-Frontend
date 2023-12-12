@@ -45,13 +45,16 @@ const InboxList = () => {
               <li
                 key={index}
                 className={`cursor-pointer p-1 rounded-md hover:bg-[#26292B] mb-1 flex flex-row items-center ${
-                  dashboardContext.dashBoardState.inboxId === inboxItem.id &&
-                  'bg-[#26292B]'
+                  dashboardContext.dashBoardState.selectedInboxId ===
+                    inboxItem.id && 'bg-[#26292B]'
                 }`}
                 onClick={() => {
                   dashboardContext.updateDashboardState(
                     (prevDashboardState: DashBoardState) => {
-                      return { ...prevDashboardState, inboxId: inboxItem.id };
+                      return {
+                        ...prevDashboardState,
+                        selectedInboxId: inboxItem.id,
+                      };
                     }
                   );
                 }}

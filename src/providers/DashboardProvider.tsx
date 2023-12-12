@@ -14,14 +14,13 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
   }`;
 
   const [dashBoardState, updateDashboardState] = useState<DashBoardState>({
-    inboxId: null,
-    conversationId: null,
+    selectedInboxId: null,
     selectedConversationId: null,
     receivedMessage: null,
+    postedMessageId: null,
   });
 
   useEffect(() => {
-    console.log('dashboard provider useEffect');
     const webSocket = new WebSocket('ws://localhost:3000/cable');
 
     webSocket.onopen = () => {
@@ -32,7 +31,10 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
 
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
-      if (parsedEvent.message?.event === 'message.created') {
+      if (
+        parsedEvent.message?.event === 'message.created' &&
+        parsedEvent.message?.data.message_type === 0
+      ) {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, receivedMessage: parsedEvent.message.data };
         });

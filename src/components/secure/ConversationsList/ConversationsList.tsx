@@ -17,7 +17,7 @@ const ConversationsList = () => {
       }/conversations`,
       method: 'get',
       params: {
-        inbox_id: dashboardContext.dashBoardState.inboxId,
+        inbox_id: dashboardContext.dashBoardState.selectedInboxId,
       },
     })
       .then((response) => {
@@ -26,7 +26,11 @@ const ConversationsList = () => {
       .catch((error) => {
         console.log(error);
       });
-  }, [dashBoardState]);
+  }, [
+    dashBoardState.selectedInboxId,
+    dashBoardState.receivedMessage,
+    dashBoardState.postedMessageId,
+  ]);
 
   return (
     <>
@@ -37,7 +41,7 @@ const ConversationsList = () => {
             {conversationList.length > 0 ? (
               conversationList.map((conversation: any, index: number) => (
                 <li
-                  key={index}
+                  key={conversation.id}
                   className={`${
                     dashBoardState.selectedConversationId === conversation.id &&
                     'bg-[#26292B]'

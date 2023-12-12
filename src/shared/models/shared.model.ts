@@ -37,10 +37,10 @@ export type ChildrenComponentProps = {
 };
 
 export interface DashBoardState {
-  inboxId: number | null;
-  conversationId: number | null;
+  selectedInboxId: number | null;
   selectedConversationId: number | null;
   receivedMessage: WebSocketMessage | null;
+  postedMessageId: number | null;
 }
 
 interface MessageData {
