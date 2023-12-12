@@ -87,7 +87,6 @@ const ChatScreen = () => {
           return { ...prevData, payload: [...prevData.payload, response.data] };
         });
         setIsMessageSending(false);
-        console.log(response);
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, postedMessageId: response.data.id };
         });

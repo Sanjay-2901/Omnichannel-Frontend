@@ -40,7 +40,13 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         });
       }
     };
-  }, []);
+
+    return () => {
+      if (webSocket.readyState === WebSocket.OPEN) {
+        webSocket.close();
+      }
+    };
+  }, [webSocketMessage]);
 
   return (
     <DashboardContext.Provider value={{ dashBoardState, updateDashboardState }}>

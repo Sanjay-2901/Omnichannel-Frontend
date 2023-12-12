@@ -3,7 +3,6 @@ import { FaBars, FaRocketchat, FaUnlock } from 'react-icons/fa';
 import { useState } from 'react';
 import './Sidebar.scss';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 
 const SideBar = () => {
   const menuItems = [
@@ -16,10 +15,8 @@ const SideBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   const authContext = useAuthContext();
-  const navigate = useNavigate();
   const onSignOut = () => {
     authContext?.removeLoggedInUser();
-    navigate('/login');
   };
 
   return (

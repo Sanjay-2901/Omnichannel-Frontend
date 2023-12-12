@@ -4,6 +4,7 @@ import {
   LoginResponse,
 } from '../../shared/models/shared.model';
 import { httpRequest } from '../axios-utils';
+import { useNavigate } from 'react-router-dom';
 
 type AuthContextType = {
   setLoggedInUser: (loginResponse: LoginResponse) => any;
@@ -17,6 +18,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<ChildrenComponentProps> = ({
   children,
 }) => {
+  const navigate = useNavigate();
+
   const setLoggedInUser = (loginResponse: any) => {
     localStorage.setItem(
       'authorization_token',
@@ -33,9 +36,14 @@ export const AuthProvider: React.FC<ChildrenComponentProps> = ({
     httpRequest({
       url: 'auth/sign_out',
       method: 'delete',
-    }).then((response) => {
-      console.log(response);
-    });
+    })
+      .then(() => {
+        navigate('/login');
+      })
+      .catch((error) => {
+        console.error(error);
+        navigate('/login');
+      });
     localStorage.clear();
   };
 
