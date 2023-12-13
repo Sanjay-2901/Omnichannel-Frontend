@@ -30,6 +30,7 @@ const ChatScreen = () => {
 
   useEffect(() => {
     getMessages();
+    if (selectedConversationId) updateMessageSeen();
     if (
       dashBoardState.receivedMessage?.conversation_id ===
         dashBoardState.selectedConversationId &&
@@ -96,6 +97,21 @@ const ChatScreen = () => {
         setIsMessageSending(false);
       });
     methods.reset();
+  };
+
+  const updateMessageSeen = () => {
+    httpRequest({
+      url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/update_last_seen`,
+      method: 'post',
+    })
+      .then((response) => {
+        updateDashboardState((prevState: DashBoardState) => {
+          return { ...prevState, messageSeenId: response.data.id };
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   return (
