@@ -58,7 +58,15 @@ const ConversationsList = () => {
                   <div className='flex flex-row items-center'>
                     <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
                       <h6 className='m-0'>
-                        {conversation.meta.sender.name[0].toUpperCase()}
+                        {conversation.meta.sender.name
+                          .split(' ')
+                          .map((word: string) => {
+                            if (word) {
+                              return word[0].toUpperCase();
+                            }
+                          })
+                          .join('')
+                          .slice(0, 2)}
                       </h6>
                     </div>
                     <div>

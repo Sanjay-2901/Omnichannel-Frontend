@@ -113,7 +113,15 @@ const ChatScreen = () => {
           <div className='flex flex-row items-center bg-[#151718] p-2 position-sticky top-0'>
             <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
               <h6 className='m-0'>
-                {messages.meta.contact.name[0].toUpperCase()}
+                {messages.meta.contact.name
+                  .split(' ')
+                  .map((word: string) => {
+                    if (word) {
+                      return word[0].toUpperCase();
+                    }
+                  })
+                  .join('')
+                  .slice(0, 2)}
               </h6>
             </div>
             <div>
@@ -136,7 +144,16 @@ const ChatScreen = () => {
                       : 'bg-blue-500 self-end rounded-l-lg'
                   } p-2 rounded-t-md h-ful whitespace-normal`}
                 >
-                  {message.content}
+                  <p className='m-0'>{message.content}</p>
+                  <small className='text-xs'>
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric',
+                      hour12: true,
+                    }).format(new Date(+message.created_at * 1000))}
+                  </small>
                 </div>
               ))}
             </div>
