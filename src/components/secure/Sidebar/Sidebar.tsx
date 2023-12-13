@@ -1,30 +1,22 @@
 import { NavLink } from 'react-router-dom';
-import { FaBars, FaRocketchat, FaUnlock, FaInbox } from 'react-icons/fa';
+import { FaBars, FaRocketchat, FaUnlock } from 'react-icons/fa';
 import { useState } from 'react';
 import './Sidebar.scss';
-import { useAuthContext } from '../../../utils/auth/auth';
-import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../../utils/auth/AuthProvider';
 
 const SideBar = () => {
   const menuItems = [
     {
-      path: '/conversations',
+      path: '/dashboard',
       name: 'Conversations',
       icon: <FaRocketchat />,
-    },
-    {
-      path: '/inboxes',
-      name: 'Inboxes',
-      icon: <FaInbox />,
     },
   ];
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(!isOpen);
   const authContext = useAuthContext();
-  const navigate = useNavigate();
   const onSignOut = () => {
     authContext?.removeLoggedInUser();
-    navigate('/login');
   };
 
   return (
@@ -49,7 +41,7 @@ const SideBar = () => {
             </div>
           </NavLink>
         ))}
-        <div className='link'>
+        <div className='link cursor-pointer'>
           <div
             className='icon'
             onClick={() => {

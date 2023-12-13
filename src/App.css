@@ -11,7 +11,7 @@ main {
   padding: 20px;
 }
 .sidebar {
-  background: #000;
+  background: #151718;
   color: #fff;
   height: 100vh;
   width: 200px;
@@ -38,13 +38,14 @@ main {
   transition: all 0.5s;
 }
 .link:hover {
-  background: lightskyblue;
+  background: #135899;
   color: #000;
   transition: all 0.5s;
 }
 .active {
-  background: lightskyblue;
-  color: #000;
+  background: #135899;
+  color: #fff;
+  text-decoration: none;
 }
 .icon,
 .link_text {

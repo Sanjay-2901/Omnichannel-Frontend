@@ -35,3 +35,61 @@ interface Accounts {
 export type ChildrenComponentProps = {
   children: ReactElement;
 };
+
+export interface DashBoardState {
+  selectedInboxId: number | null;
+  selectedConversationId: number | null;
+  receivedMessage: WebSocketMessage | null;
+  postedMessageId: number | null;
+}
+
+interface MessageData {
+  id: number;
+  content: string;
+  account_id: number;
+  inbox_id: number;
+  conversation_id: number;
+  message_type: number;
+  created_at: number;
+  updated_at: string;
+  private: boolean;
+  status: string;
+  source_id: string;
+  content_type: string;
+  content_attributes: Record<string, unknown>;
+  sender_type: string;
+  sender_id: number;
+  external_source_ids: Record<string, unknown>;
+  additional_attributes: Record<string, unknown>;
+  processed_message_content: string;
+  sentiment: Record<string, unknown>;
+  conversation: {
+    assignee_id: number;
+    unread_count: number;
+    last_activity_at: number;
+    contact_inbox: {
+      source_id: string;
+    };
+  };
+  sender: {
+    additional_attributes: {
+      username: null;
+      language_code: string;
+    };
+    custom_attributes: Record<string, unknown>;
+    email: null;
+    id: number;
+    identifier: null;
+    name: string;
+    phone_number: null;
+    thumbnail: string;
+    type: string;
+  };
+}
+interface WebSocketMessage {
+  identifier: string;
+  message: {
+    event: string;
+    data: MessageData;
+  };
+}

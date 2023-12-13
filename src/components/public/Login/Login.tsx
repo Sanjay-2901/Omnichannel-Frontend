@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { httpRequest } from '../../../utils/axios-utils';
-import { useAuthContext } from '../../../utils/auth/auth';
+import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
 type LoginFormData = {
@@ -33,9 +33,9 @@ const Login = () => {
       data: loginFormData,
     })
       .then((response) => {
-        authContext?.setLoggedInUser(response.data.data);
+        authContext?.setLoggedInUser(response);
         setIsLoading(false);
-        navigate('/');
+        navigate('/dashboard');
       })
       .catch((error) => {
         console.log(error);
