@@ -29,13 +29,19 @@ const ChatScreen = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    getMessages();
-    if (selectedConversationId) updateMessageSeen();
+    if (selectedConversationId) {
+      getMessages();
+      updateMessageSeen();
+    }
+  }, [dashBoardState.selectedConversationId]);
+
+  useEffect(() => {
     if (
       dashBoardState.receivedMessage?.conversation_id ===
         dashBoardState.selectedConversationId &&
       messages
     ) {
+      updateMessageSeen();
       setMessages((prevData: any) => {
         return {
           ...prevData,
@@ -43,10 +49,12 @@ const ChatScreen = () => {
         };
       });
     }
-  }, [dashBoardState.selectedConversationId, dashBoardState.receivedMessage]);
+  }, [dashBoardState.receivedMessage]);
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   const scrollToBottom = () => {

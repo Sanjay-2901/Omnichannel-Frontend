@@ -28,9 +28,9 @@ const ConversationsList = () => {
       });
   }, [
     dashBoardState.selectedInboxId,
-    dashBoardState.receivedMessage,
     dashBoardState.postedMessageId,
     dashBoardState.messageSeenId,
+    dashBoardState.receivedMessage,
   ]);
 
   return (
