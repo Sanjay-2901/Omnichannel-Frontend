@@ -26,7 +26,8 @@ const ChatScreen = () => {
     },
   });
   const { isValid } = methods.formState;
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [prevScrollHeight, setPrevScrollHeight] = useState(0);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -48,30 +49,77 @@ const ChatScreen = () => {
           payload: [...prevData.payload, dashBoardState.receivedMessage],
         };
       });
+      setTimeout(() => {
+        chatContainerRef.current?.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+        });
+      }, 0);
     }
   }, [dashBoardState.receivedMessage]);
 
   useEffect(() => {
     if (messages) {
-      scrollToBottom();
+      if (messages.payload.length <= 20) {
+        scrollToBottom();
+      }
+      setPrevScrollHeight(chatContainerRef.current?.scrollHeight ?? 0);
+    }
+
+    const chatContainer = chatContainerRef.current;
+    if (chatContainer) {
+      chatContainer.addEventListener('scroll', handleScroll);
+
+      return () => chatContainer.removeEventListener('scroll', handleScroll);
     }
   }, [messages]);
 
-  const scrollToBottom = () => {
+  const handleScroll = () => {
     if (chatContainerRef.current) {
+      const currentScrollTop = chatContainerRef.current.scrollTop;
+      if (
+        currentScrollTop === 0 &&
+        chatContainerRef.current.scrollHeight -
+          chatContainerRef.current.clientHeight !==
+          0
+      ) {
+        getMessages(messages.payload[0].id);
+      }
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (
+      chatContainerRef.current &&
+      chatContainerRef.current.scrollHeight -
+        chatContainerRef.current.clientHeight !==
+        0
+    ) {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
   };
 
-  const getMessages = () => {
+  const getMessages = (param = null) => {
     if (dashBoardState.selectedConversationId) {
       httpRequest({
         url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages`,
         method: 'get',
+        params: { before: param },
       })
         .then((response) => {
-          setMessages(response.data);
+          if (response.data.payload.length > 0 && !param) {
+            setMessages(response.data);
+          } else if (response.data.payload.length > 0 && param) {
+            setMessages((prevState: any) => {
+              return {
+                ...prevState,
+                payload: [...response.data.payload, ...prevState.payload],
+              };
+            });
+            chatContainerRef.current?.scrollTo({
+              top: chatContainerRef.current.scrollHeight - prevScrollHeight,
+            });
+          }
         })
         .catch((error) => {
           console.log(error);
@@ -99,6 +147,11 @@ const ChatScreen = () => {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, postedMessageId: response.data.id };
         });
+        setTimeout(() => {
+          chatContainerRef.current?.scrollTo({
+            top: chatContainerRef.current.scrollHeight,
+          });
+        }, 0);
       })
       .catch((error) => {
         console.log(error);
@@ -143,6 +196,7 @@ const ChatScreen = () => {
                     if (word) {
                       return word[0].toUpperCase();
                     }
+                    return '';
                   })
                   .join('')
                   .slice(0, 2)}
@@ -156,7 +210,7 @@ const ChatScreen = () => {
         {messages && (
           <>
             <div
-              className='flex flex-col p-3 h-full overflow-y-auto scroll-smooth'
+              className='flex flex-col px-3 pt-3 h-full overflow-y-auto'
               ref={chatContainerRef}
             >
               {messages.payload.map((message: any, index: number) => (
