@@ -41,6 +41,7 @@ export interface DashBoardState {
   selectedConversationId: number | null;
   receivedMessage: WebSocketMessage | null;
   postedMessageId: number | null;
+  messageSeenId: number | null;
 }
 
 interface MessageData {

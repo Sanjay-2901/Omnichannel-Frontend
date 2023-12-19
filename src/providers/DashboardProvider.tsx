@@ -18,6 +18,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     selectedConversationId: null,
     receivedMessage: null,
     postedMessageId: null,
+    messageSeenId: null,
   });
 
   useEffect(() => {
@@ -32,7 +33,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
       if (
-        parsedEvent.message?.event === 'message.created' &&
+        parsedEvent.message?.event === 'message.updated' &&
         parsedEvent.message?.data.message_type === 0
       ) {
         updateDashboardState((prevState: DashBoardState) => {

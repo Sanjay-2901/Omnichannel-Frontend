@@ -28,8 +28,9 @@ const ConversationsList = () => {
       });
   }, [
     dashBoardState.selectedInboxId,
-    dashBoardState.receivedMessage,
     dashBoardState.postedMessageId,
+    dashBoardState.messageSeenId,
+    dashBoardState.receivedMessage,
   ]);
 
   return (
@@ -39,13 +40,13 @@ const ConversationsList = () => {
           <h4 className='mb-3'>Conversations</h4>
           <ul className='p-0 m-0'>
             {conversationList.length > 0 ? (
-              conversationList.map((conversation: any, index: number) => (
+              conversationList.map((conversation: any) => (
                 <li
                   key={conversation.id}
                   className={`${
                     dashBoardState.selectedConversationId === conversation.id &&
                     'bg-[#26292B]'
-                  } mb-2 cursor-pointer hover:bg-[#26292B] p-2 rounded-md`}
+                  } mb-2 cursor-pointer hover:bg-[#26292B] p-2 rounded-md flex flex-row justify-between border-b-2 border-b-[#26292B]`}
                   onClick={() => {
                     updateDashboardState((prevState: DashBoardState) => {
                       return {
@@ -74,6 +75,15 @@ const ConversationsList = () => {
                       <p className='m-0'>{conversation.messages[0].content}</p>
                     </div>
                   </div>
+                  {+conversation.messages[0].conversation.unread_count > 0 && (
+                    <div className='rounded-full bg-green-400 h-5 w-5 place-self-end flex flex-row items-center justify-center'>
+                      <small className='text-xs text-black font-semibold'>
+                        {+conversation.messages[0].conversation.unread_count < 9
+                          ? conversation.messages[0].conversation.unread_count
+                          : '9+'}
+                      </small>
+                    </div>
+                  )}
                 </li>
               ))
             ) : (
