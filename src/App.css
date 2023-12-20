@@ -10,12 +10,12 @@ main {
   width: 100%;
   padding: 20px;
 }
-.sidebar {
+.side-bar {
   background: #151718;
   color: #fff;
   height: 100vh;
   width: 200px;
-  transition: all 0.5s;
+  transition: width 0.3s;
 }
 .top_section {
   display: flex;
@@ -30,17 +30,17 @@ main {
   font-size: 25px;
   margin-left: 50px;
 }
-.link {
+.sidebar-link {
   display: flex;
   color: #fff;
   padding: 10px 15px;
   gap: 15px;
-  transition: all 0.5s;
+  transition: all 0.3s;
 }
-.link:hover {
+.sidebar-link:hover {
   background: #135899;
   color: #000;
-  transition: all 0.5s;
+  transition: all 0.3s;
 }
 .active {
   background: #135899;

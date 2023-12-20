@@ -7,6 +7,7 @@ import UnAuth from './components/public/UnAuth/UnAuth';
 import NotFound from './components/public/NotFound/NotFound';
 import DefaultLayout from './components/secure/DefaultLayout/DefaultLayout';
 import Dashboard from './components/secure/Dashboard/Dashboard';
+import DashboardProvider from './providers/DashboardProvider';
 
 function App() {
   return (
@@ -20,8 +21,22 @@ function App() {
             </RequireAuth>
           }
         >
-          <Route path='' element={<Navigate to='/dashboard' />} />
-          <Route path='/dashboard' element={<Dashboard />} />
+          <Route
+            path=''
+            element={
+              <DashboardProvider>
+                <Navigate to='/dashboard' />
+              </DashboardProvider>
+            }
+          />
+          <Route
+            path='/dashboard'
+            element={
+              <DashboardProvider>
+                <Dashboard />
+              </DashboardProvider>
+            }
+          />
         </Route>
         <Route
           path='/login'

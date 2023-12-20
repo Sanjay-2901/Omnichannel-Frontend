@@ -3,6 +3,7 @@ import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
+import { HiBars3CenterLeft } from 'react-icons/hi2';
 
 const ConversationsList = () => {
   const [conversationList, setConversationList] = useState<any>(null);
@@ -24,7 +25,7 @@ const ConversationsList = () => {
         setConversationList(response.data.data.payload);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }, [
     dashBoardState.selectedInboxId,
@@ -33,11 +34,24 @@ const ConversationsList = () => {
     dashBoardState.receivedMessage,
   ]);
 
+  const toggleInboxes = () => {
+    updateDashboardState((prevState: DashBoardState) => {
+      return { ...prevState, showInboxes: !prevState.showInboxes };
+    });
+  };
+
   return (
     <>
       {conversationList && (
         <div>
-          <h4 className='mb-3'>Conversations</h4>
+          <div className='flex items-center mb-3'>
+            <HiBars3CenterLeft
+              size={20}
+              onClick={toggleInboxes}
+              className='cursor-pointer lg:hidden'
+            />
+            <h4 className='ml-3 mb-0'>Conversations</h4>
+          </div>
           <ul className='p-0 m-0'>
             {conversationList.length > 0 ? (
               conversationList.map((conversation: any) => (

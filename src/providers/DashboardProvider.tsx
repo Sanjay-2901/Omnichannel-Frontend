@@ -19,6 +19,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     receivedMessage: null,
     postedMessageId: null,
     messageSeenId: null,
+    showInboxes: false,
   });
 
   useEffect(() => {

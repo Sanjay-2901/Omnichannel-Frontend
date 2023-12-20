@@ -21,7 +21,7 @@ const SideBar = () => {
 
   return (
     <div className='main-container'>
-      <div style={{ width: isOpen ? '200px' : '50px' }} className='sidebar'>
+      <div style={{ width: isOpen ? '200px' : '50px' }} className='side-bar'>
         <div className='top_section'>
           <h1 style={{ display: isOpen ? 'block' : 'none' }} className='logo'>
             OC
@@ -31,7 +31,7 @@ const SideBar = () => {
           </div>
         </div>
         {menuItems.map((item, index) => (
-          <NavLink to={item.path} key={index} className='link'>
+          <NavLink to={item.path} key={index} className='sidebar-link'>
             <div className='icon'>{item.icon}</div>
             <div
               style={{ display: isOpen ? 'block' : 'none' }}
@@ -41,7 +41,7 @@ const SideBar = () => {
             </div>
           </NavLink>
         ))}
-        <div className='link cursor-pointer'>
+        <div className='sidebar-link cursor-pointer'>
           <div
             className='icon'
             onClick={() => {

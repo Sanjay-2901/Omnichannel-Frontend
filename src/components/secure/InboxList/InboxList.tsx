@@ -39,7 +39,11 @@ const InboxList = () => {
 
   const getAllConversations = () => {
     updateDashboardState((prevState: DashBoardState) => {
-      return { ...prevState, selectedInboxId: null };
+      return {
+        ...prevState,
+        selectedInboxId: null,
+        selectedConversationId: null,
+      };
     });
   };
 
