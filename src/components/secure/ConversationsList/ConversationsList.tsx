@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
@@ -6,10 +6,16 @@ import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
 
 const ConversationsList = () => {
-  const [conversationList, setConversationList] = useState<any>(null);
   const dashboardContext = useDashboardContext();
   const authContext = useAuthContext();
-  const { dashBoardState, updateDashboardState } = dashboardContext;
+  const {
+    dashBoardState,
+    updateDashboardState,
+    getIcons,
+    conversationList,
+    setConversationList,
+    getInboxName,
+  } = dashboardContext;
 
   useEffect(() => {
     httpRequest({
@@ -70,8 +76,8 @@ const ConversationsList = () => {
                     });
                   }}
                 >
-                  <div className='flex flex-row items-center'>
-                    <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
+                  <div className='flex flex-row'>
+                    <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3 self-end'>
                       <h6 className='m-0'>
                         {conversation.meta.sender.name
                           .split(' ')
@@ -85,6 +91,12 @@ const ConversationsList = () => {
                       </h6>
                     </div>
                     <div>
+                      <div className='flex items-center mb-2'>
+                        {getIcons(conversation.meta.channel.slice(9))}
+                        <small className='text-[#787f85] text-xs font-semibold ml-1'>
+                          {getInboxName(conversation.id)}
+                        </small>
+                      </div>
                       <h6 className='mb-1'>{conversation.meta.sender.name}</h6>
                       <p className='m-0'>{conversation.messages[0].content}</p>
                     </div>

@@ -6,7 +6,10 @@ import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
-import { DashBoardState } from '../../../shared/models/shared.model';
+import {
+  Conversation,
+  DashBoardState,
+} from '../../../shared/models/shared.model';
 import { IoChevronBackSharp } from 'react-icons/io5';
 
 type MessageForm = {
@@ -16,7 +19,13 @@ type MessageForm = {
 const ChatScreen = () => {
   const dashboardContext = useDashboardContext();
   const authContext = useAuthContext();
-  const { dashBoardState, updateDashboardState } = dashboardContext;
+  const {
+    dashBoardState,
+    updateDashboardState,
+    getInboxName,
+    conversationList,
+    getIcons,
+  } = dashboardContext;
   const [messages, setMessages] = useState<any>(null);
   const [isMessageSending, setIsMessageSending] = useState(false);
   const accountId = authContext?.getUserDetails().account_id;
@@ -183,6 +192,13 @@ const ChatScreen = () => {
     setMessages(null);
   };
 
+  const getChannelIcon = () => {
+    const conversation = conversationList.find(
+      (conversation: Conversation) => conversation.id === selectedConversationId
+    );
+    return getIcons(conversation?.meta.channel.slice(9));
+  };
+
   return (
     <>
       {!selectedConversationId && (
@@ -216,7 +232,13 @@ const ChatScreen = () => {
               </h6>
             </div>
             <div>
-              <h6 className='mb-1'>{messages.meta.contact.name}</h6>
+              <h6 className='mb-2'>{messages.meta.contact.name}</h6>
+              <div className='flex items-center'>
+                {getChannelIcon()}
+                <small className='ml-1 text-xs text-[#787f85] font-semibold'>
+                  {getInboxName(selectedConversationId)}
+                </small>
+              </div>
             </div>
           </div>
 
