@@ -40,7 +40,7 @@ const InboxList = () => {
 
   return (
     <>
-      {inboxList && (
+      {inboxList ? (
         <div>
           <h4 className='mb-3'>Inboxes</h4>
           <ul className='p-0 mb-3'>
@@ -82,6 +82,8 @@ const InboxList = () => {
             ))}
           </ul>
         </div>
+      ) : (
+        <h6 className='mt-5 text-center'>No conversations found</h6>
       )}
     </>
   );

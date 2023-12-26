@@ -49,8 +49,8 @@ const ConversationsList = () => {
   return (
     <>
       {conversationList && (
-        <div>
-          <div className='flex items-center mb-3'>
+        <div className='relative h-full flex flex-col'>
+          <div className='flex items-center mb-3 sticky'>
             <HiBars3CenterLeft
               size={20}
               onClick={toggleInboxes}
@@ -58,7 +58,7 @@ const ConversationsList = () => {
             />
             <h4 className='ml-3 mb-0'>Conversations</h4>
           </div>
-          <ul className='p-0 m-0'>
+          <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
               conversationList.map((conversation: any) => (
                 <li

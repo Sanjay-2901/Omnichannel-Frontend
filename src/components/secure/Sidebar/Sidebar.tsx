@@ -1,7 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { FaBars, FaRocketchat, FaUnlock } from 'react-icons/fa';
 import { useState } from 'react';
-import './Sidebar.scss';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 
 const SideBar = () => {
