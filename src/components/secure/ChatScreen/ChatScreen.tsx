@@ -38,6 +38,7 @@ const ChatScreen = () => {
   const { isValid } = methods.formState;
   const chatContainerRef = useRef<HTMLDivElement | null>(null);
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -111,12 +112,14 @@ const ChatScreen = () => {
 
   const getMessages = (param = null) => {
     if (dashBoardState.selectedConversationId) {
+      setIsMessagesLoading(true);
       httpRequest({
         url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages`,
         method: 'get',
         params: { before: param },
       })
         .then((response) => {
+          setIsMessagesLoading(false);
           if (response.data.payload.length > 0 && !param) {
             setMessages(response.data);
           } else if (response.data.payload.length > 0 && param) {
@@ -132,6 +135,7 @@ const ChatScreen = () => {
           }
         })
         .catch((error) => {
+          setIsMessagesLoading(false);
           console.log(error);
         });
     }
@@ -200,13 +204,19 @@ const ChatScreen = () => {
   };
 
   return (
-    <>
-      {!selectedConversationId && (
-        <div className='flex items-center justify-center h-100'>
+    <div className='relative h-100'>
+      {!selectedConversationId && !isMessagesLoading && (
+        <div className='center-el text-center'>
           <div className='flex flex-column items-center'>
             <IoLogoSnapchat size={70} />
             <h4>Please select a conversation</h4>
           </div>
+        </div>
+      )}
+
+      {isMessagesLoading && (
+        <div className='center-el'>
+          <div className='spinner-border spinner-border-md'></div>
         </div>
       )}
 
@@ -295,7 +305,7 @@ const ChatScreen = () => {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
