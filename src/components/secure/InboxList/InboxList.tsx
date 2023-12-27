@@ -1,26 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
-import { FaTelegram } from 'react-icons/fa';
-import { TbWorldWww } from 'react-icons/tb';
-import { MdOutlineMail } from 'react-icons/md';
 import { BsFillInboxesFill } from 'react-icons/bs';
 import './InboxList.scss';
 
-type IconKey = 'Telegram' | 'Email' | 'WebWidget';
-
 const InboxList = () => {
-  const [inboxList, setInboxList] = useState<any>(null);
   const authContext = useAuthContext();
   const dashboardContext = useDashboardContext();
-  const { dashBoardState, updateDashboardState } = dashboardContext;
-  const icons = {
-    Telegram: <FaTelegram />,
-    Email: <MdOutlineMail />,
-    WebWidget: <TbWorldWww />,
-  };
+  const {
+    dashBoardState,
+    updateDashboardState,
+    inboxList,
+    setInboxList,
+    getIcons,
+  } = dashboardContext;
 
   useEffect(() => {
     httpRequest({
@@ -33,19 +28,19 @@ const InboxList = () => {
     });
   }, []);
 
-  const getIcons = (channel: IconKey): any => {
-    return icons[channel] || <FaTelegram />;
-  };
-
   const getAllConversations = () => {
     updateDashboardState((prevState: DashBoardState) => {
-      return { ...prevState, selectedInboxId: null };
+      return {
+        ...prevState,
+        selectedInboxId: null,
+        selectedConversationId: null,
+      };
     });
   };
 
   return (
     <>
-      {inboxList && (
+      {inboxList ? (
         <div>
           <h4 className='mb-3'>Inboxes</h4>
           <ul className='p-0 mb-3'>
@@ -74,6 +69,7 @@ const InboxList = () => {
                     return {
                       ...prevDashboardState,
                       selectedInboxId: inboxItem.id,
+                      selectedConversationId: null,
                     };
                   });
                 }}
@@ -86,6 +82,8 @@ const InboxList = () => {
             ))}
           </ul>
         </div>
+      ) : (
+        <h6 className='mt-5 text-center'>No conversations found</h6>
       )}
     </>
   );

@@ -1,14 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
+import { HiBars3CenterLeft } from 'react-icons/hi2';
 
 const ConversationsList = () => {
-  const [conversationList, setConversationList] = useState<any>(null);
   const dashboardContext = useDashboardContext();
   const authContext = useAuthContext();
-  const { dashBoardState, updateDashboardState } = dashboardContext;
+  const {
+    dashBoardState,
+    updateDashboardState,
+    getIcons,
+    conversationList,
+    setConversationList,
+    getInboxName,
+  } = dashboardContext;
 
   useEffect(() => {
     httpRequest({
@@ -24,7 +31,7 @@ const ConversationsList = () => {
         setConversationList(response.data.data.payload);
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }, [
     dashBoardState.selectedInboxId,
@@ -33,12 +40,25 @@ const ConversationsList = () => {
     dashBoardState.receivedMessage,
   ]);
 
+  const toggleInboxes = () => {
+    updateDashboardState((prevState: DashBoardState) => {
+      return { ...prevState, showInboxes: !prevState.showInboxes };
+    });
+  };
+
   return (
     <>
       {conversationList && (
-        <div>
-          <h4 className='mb-3'>Conversations</h4>
-          <ul className='p-0 m-0'>
+        <div className='relative h-full flex flex-col'>
+          <div className='flex items-center mb-3 sticky'>
+            <HiBars3CenterLeft
+              size={20}
+              onClick={toggleInboxes}
+              className='cursor-pointer lg:hidden'
+            />
+            <h4 className='ml-3 mb-0'>Conversations</h4>
+          </div>
+          <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
               conversationList.map((conversation: any) => (
                 <li
@@ -56,8 +76,8 @@ const ConversationsList = () => {
                     });
                   }}
                 >
-                  <div className='flex flex-row items-center'>
-                    <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
+                  <div className='flex flex-row'>
+                    <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3 self-end'>
                       <h6 className='m-0'>
                         {conversation.meta.sender.name
                           .split(' ')
@@ -71,6 +91,12 @@ const ConversationsList = () => {
                       </h6>
                     </div>
                     <div>
+                      <div className='flex items-center mb-2'>
+                        {getIcons(conversation.meta.channel.slice(9))}
+                        <small className='text-[#787f85] text-xs font-semibold ml-1'>
+                          {getInboxName(conversation.id)}
+                        </small>
+                      </div>
                       <h6 className='mb-1'>{conversation.meta.sender.name}</h6>
                       <p className='m-0'>{conversation.messages[0].content}</p>
                     </div>
