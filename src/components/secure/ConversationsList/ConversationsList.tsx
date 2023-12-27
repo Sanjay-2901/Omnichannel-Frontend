@@ -4,6 +4,7 @@ import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
+import { FaSearch } from 'react-icons/fa';
 
 const ConversationsList = () => {
   const dashboardContext = useDashboardContext();
@@ -57,6 +58,9 @@ const ConversationsList = () => {
               className='cursor-pointer lg:hidden'
             />
             <h4 className='ml-3 mb-0'>Conversations</h4>
+            <div className='block'>
+              <FaSearch />
+            </div>
           </div>
           <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
