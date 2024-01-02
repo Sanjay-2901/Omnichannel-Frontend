@@ -7,16 +7,21 @@ import { useNavigate } from 'react-router-dom';
 import {
   SearchMessageResult,
   SearchMessage,
+  SearchConversationResult,
+  ConversationResult,
+  DashBoardState,
 } from '../../../shared/models/shared.model';
+import { IoIosInformationCircleOutline } from 'react-icons/io';
 
 const Search = () => {
   const dashboardContext = useDashboardContext();
   const authContext = useAuthContext();
-  const { debounce, getIcons, formatTimePeriod } = dashboardContext;
+  const { debounce, getIcons, formatTimePeriod, updateDashboardState } =
+    dashboardContext;
   const [messageSearchResults, setMessageSearchResults] =
     useState<SearchMessageResult | null>(null);
   const [conversationSearchResults, setConversationSearchResults] =
-    useState(null);
+    useState<SearchConversationResult | null>(null);
   const navigate = useNavigate();
 
   const onSearch = (event: ChangeEvent<HTMLInputElement>) => {
@@ -59,6 +64,17 @@ const Search = () => {
 
   const debouncedSearch = debounce(onSearch, 500);
 
+  const selectSearchResult = (result: any) => {
+    console.log(result);
+    if (result.hasOwnProperty('agent')) {
+      updateDashboardState((prevState: DashBoardState) => {
+        return { ...prevState, selectedConversationId: result.id };
+      });
+      navigate('/dashboard');
+    } else {
+    }
+  };
+
   return (
     <div className='bg-[#151718] h-full text-white flex flex-col'>
       <div>
@@ -84,10 +100,10 @@ const Search = () => {
           </div>
         )}
       </div>
-      {messageSearchResults &&
-        messageSearchResults.payload.messages.length > 0 && (
-          <div className='mt-2 overflow-y-scroll w-50 mx-auto'>
-            <h5>Messages</h5>
+      {messageSearchResults && conversationSearchResults && (
+        <div className='mt-2 overflow-y-scroll w-50 mx-auto p-2'>
+          <h5>Messages</h5>
+          {messageSearchResults!.payload.messages.length > 0 ? (
             <ul className='p-0 mt-1'>
               {messageSearchResults.payload.messages.map(
                 (message: SearchMessage) => {
@@ -95,6 +111,9 @@ const Search = () => {
                     <li
                       key={message.id}
                       className='hover:bg-[#26292b] rounded-md cursor-pointer p-2'
+                      onClick={() => {
+                        selectSearchResult(message);
+                      }}
                     >
                       <div className='flex justify-between'>
                         <div className='flex items-center bg-[#26292b] p-1 rounded-md'>
@@ -121,8 +140,61 @@ const Search = () => {
                 }
               )}
             </ul>
-          </div>
-        )}
+          ) : (
+            <div className='bg-[#26292b] p-3 rounded-md flex justify-center'>
+              <div className='flex items-center'>
+                <IoIosInformationCircleOutline size={20} />
+                <h6 className='m-0 pl-2'>No messages found</h6>
+              </div>
+            </div>
+          )}
+          <h5 className='mt-3'>Conversations</h5>
+          {conversationSearchResults!.payload.conversations.length > 0 ? (
+            <ul className='p-0 mt-1'>
+              {conversationSearchResults!.payload.conversations.map(
+                (conversation: ConversationResult) => {
+                  return (
+                    <li
+                      key={conversation.id}
+                      className='hover:bg-[#26292b] rounded-md cursor-pointer p-2'
+                      onClick={() => {
+                        selectSearchResult(conversation);
+                      }}
+                    >
+                      <div className='flex justify-between'>
+                        <div className='flex items-center bg-[#26292b] p-1 rounded-md'>
+                          {getIcons(conversation.inbox.channel_type.slice(9))}
+                          <small className='text-[#787f85] font-semibold ml-1'>
+                            {conversation.inbox.name}
+                          </small>
+                        </div>
+                        <small className='text-xs'>
+                          {formatTimePeriod(+conversation.created_at)}
+                        </small>
+                      </div>
+                      <div className='mt-2 border-l-2 pl-2'>
+                        <p className='font-light m-0'>
+                          from:{' '}
+                          <span className='font-semibold'>
+                            {conversation.message.sender.name}
+                          </span>
+                        </p>
+                      </div>
+                    </li>
+                  );
+                }
+              )}
+            </ul>
+          ) : (
+            <div className='bg-[#26292b] p-3 rounded-md flex justify-center mb-3'>
+              <div className='flex items-center'>
+                <IoIosInformationCircleOutline size={20} />
+                <h6 className='m-0 pl-2'>No conversations found</h6>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -276,3 +276,42 @@ export interface SearchMessage {
     channel_type: string;
   };
 }
+
+export interface SearchConversationResult {
+  payload: {
+    conversations: ConversationResult[];
+  };
+}
+
+export interface ConversationResult {
+  id: number;
+  account_id: number;
+  created_at: number;
+  message: SearchMessage;
+  contact: Contact;
+  inbox: InboxSearch;
+  agent: Agent;
+}
+
+interface Contact {
+  email: null | string;
+  id: number;
+  name: string;
+  phone_number: null | string;
+  identifier: null | string;
+}
+
+interface InboxSearch {
+  id: number;
+  channel_id: number;
+  name: string;
+  channel_type: string;
+}
+
+interface Agent {
+  id: number;
+  available_name: string;
+  email: string;
+  name: string;
+  role: string;
+}
