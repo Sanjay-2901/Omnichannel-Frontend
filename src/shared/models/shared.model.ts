@@ -239,3 +239,40 @@ interface Message {
     type: string;
   };
 }
+
+export interface SearchMessageResult {
+  payload: {
+    messages: SearchMessage[];
+  };
+}
+
+export interface SearchMessage {
+  id: number;
+  content: string;
+  message_type: number;
+  content_type: string;
+  source_id: string;
+  inbox_id: number;
+  conversation_id: number;
+  created_at: number;
+  sender: {
+    additional_attributes: {
+      username: string;
+      language_code: string;
+    };
+    custom_attributes: Record<string, unknown>;
+    email: null;
+    id: number;
+    identifier: null;
+    name: string;
+    phone_number: null;
+    thumbnail: string;
+    type: string;
+  };
+  inbox: {
+    id: number;
+    channel_id: number;
+    name: string;
+    channel_type: string;
+  };
+}
