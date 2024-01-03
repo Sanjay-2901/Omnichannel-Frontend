@@ -20,7 +20,10 @@ const SideBar = () => {
 
   return (
     <div className='main-container'>
-      <div style={{ width: isOpen ? '200px' : '50px' }} className='side-bar'>
+      <div
+        style={{ width: isOpen ? '200px' : '50px' }}
+        className='side-bar border-r'
+      >
         <div className='top_section'>
           <h1 style={{ display: isOpen ? 'block' : 'none' }} className='logo'>
             OC

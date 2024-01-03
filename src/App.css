@@ -52,6 +52,10 @@ main {
   font-size: 20px;
 }
 
+.border-r {
+  border-right: hsl(198 6.6% 15.8% / 0.5) 2px solid;
+}
+
 ::-webkit-scrollbar-track {
   border-radius: 6px;
 }

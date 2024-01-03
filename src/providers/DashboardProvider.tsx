@@ -77,6 +77,40 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     };
   }, [webSocketMessage]);
 
+  const debounce = <T extends (...args: any[]) => void>(
+    func: T,
+    delay: number
+  ) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
+  };
+
+  const formatTimePeriod = (timestamp: number) => {
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const secondsAgo = currentTimestamp - timestamp;
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+      second: 1,
+    };
+    const interval = Object.entries(intervals).find(
+      ([unit, seconds]) => secondsAgo >= seconds
+    );
+    return interval
+      ? `${Math.floor(secondsAgo / interval[1])} ${interval[0]}${
+          Math.floor(secondsAgo / interval[1]) === 1 ? '' : 's'
+        } ago`
+      : 'Just now';
+  };
+
   return (
     <DashboardContext.Provider
       value={{
@@ -88,6 +122,8 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         setConversationList,
         getIcons,
         getInboxName,
+        debounce,
+        formatTimePeriod,
       }}
     >
       {children}

@@ -8,20 +8,7 @@ import { DashBoardState } from '../../../shared/models/shared.model';
 
 const Dashboard = () => {
   const dashboardContext = useDashboardContext();
-  const { dashBoardState, updateDashboardState } = dashboardContext;
-
-  const debounce = <T extends (...args: any[]) => void>(
-    func: T,
-    delay: number
-  ) => {
-    let timeoutId: NodeJS.Timeout;
-    return (...args: Parameters<T>) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
-    };
-  };
+  const { dashBoardState, updateDashboardState, debounce } = dashboardContext;
 
   const checkScreenSize = () => {
     if (window.innerWidth < 1024) {
@@ -53,7 +40,7 @@ const Dashboard = () => {
       <div
         className={`${
           dashBoardState.selectedConversationId && 'hidden lg:block'
-        } p-2 bg pt-3 w-full lg:w-4/12`}
+        } p-2 bg border-l pt-3 w-full lg:w-4/12`}
       >
         <ConversationsList />
       </div>

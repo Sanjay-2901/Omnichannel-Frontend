@@ -8,6 +8,7 @@ import NotFound from './components/public/NotFound/NotFound';
 import DefaultLayout from './components/secure/DefaultLayout/DefaultLayout';
 import Dashboard from './components/secure/Dashboard/Dashboard';
 import DashboardProvider from './providers/DashboardProvider';
+import Search from './components/secure/Search/Search';
 
 function App() {
   return (
@@ -17,26 +18,15 @@ function App() {
           path='/'
           element={
             <RequireAuth>
-              <DefaultLayout />
+              <DashboardProvider>
+                <DefaultLayout />
+              </DashboardProvider>
             </RequireAuth>
           }
         >
-          <Route
-            path=''
-            element={
-              <DashboardProvider>
-                <Navigate to='/dashboard' />
-              </DashboardProvider>
-            }
-          />
-          <Route
-            path='/dashboard'
-            element={
-              <DashboardProvider>
-                <Dashboard />
-              </DashboardProvider>
-            }
-          />
+          <Route path='' element={<Navigate to='/dashboard' />} />
+          <Route path='/dashboard' element={<Dashboard />} />
+          <Route path='/search' element={<Search />} />
         </Route>
         <Route
           path='/login'
