@@ -25,6 +25,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     postedMessageId: null,
     messageSeenId: null,
     showInboxes: false,
+    searchedMessageId: null,
   });
   const [inboxList, setInboxList] = useState([]);
   const [conversationList, setConversationList] = useState<any>([]);

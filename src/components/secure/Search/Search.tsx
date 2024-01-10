@@ -65,13 +65,20 @@ const Search = () => {
   const debouncedSearch = debounce(onSearch, 500);
 
   const selectSearchResult = (result: any) => {
-    console.log(result);
     if (result.hasOwnProperty('agent')) {
       updateDashboardState((prevState: DashBoardState) => {
         return { ...prevState, selectedConversationId: result.id };
       });
       navigate('/dashboard');
     } else {
+      updateDashboardState((prevState: DashBoardState) => {
+        return {
+          ...prevState,
+          searchedMessageId: result.id,
+          selectedConversationId: result.conversation_id,
+        };
+      });
+      navigate('/dashboard');
     }
   };
 

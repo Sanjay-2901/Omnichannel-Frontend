@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
-import { IoLogoSnapchat } from 'react-icons/io';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
+import { IoLogoSnapchat } from 'react-icons/io';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
@@ -17,35 +18,43 @@ type MessageForm = {
 };
 
 const ChatScreen = () => {
-  const dashboardContext = useDashboardContext();
-  const authContext = useAuthContext();
+  const [messages, setMessages] = useState<any | null>(null);
+  const DashboardContext = useDashboardContext();
   const {
     dashBoardState,
     updateDashboardState,
     getInboxName,
     conversationList,
     getIcons,
-  } = dashboardContext;
-  const [messages, setMessages] = useState<any>(null);
-  const [isMessageSending, setIsMessageSending] = useState(false);
-  const accountId = authContext?.getUserDetails().account_id;
+  } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
+  const authContext = useAuthContext();
+  const accountId = authContext?.getUserDetails().account_id;
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  const [isDataEmpty, setIsDataEmpty] = useState(false);
+  const [isMessageSending, setIsMessageSending] = useState(false);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const methods = useForm<MessageForm>({
     defaultValues: {
       message: '',
     },
   });
   const { isValid } = methods.formState;
-  const chatContainerRef = useRef<HTMLDivElement | null>(null);
-  const [prevScrollHeight, setPrevScrollHeight] = useState(0);
-  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
   useEffect(() => {
     if (selectedConversationId) {
-      getMessages();
+      fetchMessages();
       updateMessageSeen();
     }
-  }, [dashBoardState.selectedConversationId]);
+  }, [selectedConversationId]);
+
+  useEffect(() => {
+    if (messages) {
+      if (messages.payload.length <= 20) {
+        scrollToBottom();
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     if (
@@ -57,46 +66,14 @@ const ChatScreen = () => {
       setMessages((prevData: any) => {
         return {
           ...prevData,
-          payload: [...prevData.payload, dashBoardState.receivedMessage],
+          payload: [dashBoardState.receivedMessage, ...prevData.payload],
         };
       });
-      setTimeout(() => {
-        chatContainerRef.current?.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
-        });
-      }, 0);
+      chatContainerRef.current?.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+      });
     }
   }, [dashBoardState.receivedMessage]);
-
-  useEffect(() => {
-    if (messages) {
-      if (messages.payload.length <= 20) {
-        scrollToBottom();
-      }
-      setPrevScrollHeight(chatContainerRef.current?.scrollHeight ?? 0);
-    }
-
-    const chatContainer = chatContainerRef.current;
-    if (chatContainer) {
-      chatContainer.addEventListener('scroll', handleScroll);
-
-      return () => chatContainer.removeEventListener('scroll', handleScroll);
-    }
-  }, [messages]);
-
-  const handleScroll = () => {
-    if (chatContainerRef.current) {
-      const currentScrollTop = chatContainerRef.current.scrollTop;
-      if (
-        currentScrollTop === 0 &&
-        chatContainerRef.current.scrollHeight -
-          chatContainerRef.current.clientHeight !==
-          0
-      ) {
-        getMessages(messages.payload[0].id);
-      }
-    }
-  };
 
   const scrollToBottom = () => {
     if (
@@ -110,35 +87,62 @@ const ChatScreen = () => {
     }
   };
 
-  const getMessages = (param = null) => {
-    if (dashBoardState.selectedConversationId) {
-      setIsMessagesLoading(true);
-      httpRequest({
-        url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages`,
-        method: 'get',
-        params: { before: param },
+  const fetchMessages = (beforeParam = null, afterParam = null) => {
+    setIsMessagesLoading(true);
+    httpRequest({
+      url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages`,
+      method: 'get',
+      params: { before: beforeParam, after: afterParam },
+    })
+      .then((response) => {
+        const modifiedResponse = {
+          ...response,
+          data: {
+            ...response.data,
+            payload: response.data.payload.reverse(),
+          },
+        };
+        if (modifiedResponse.data.payload.length === 0) {
+          setIsDataEmpty(true);
+          setIsMessagesLoading(false);
+        } else if (beforeParam) {
+          setIsDataEmpty(false);
+          setIsMessagesLoading(false);
+          setMessages((prevState: any) => {
+            return {
+              ...prevState,
+              payload: [...prevState.payload, ...modifiedResponse.data.payload],
+            };
+          });
+        } else {
+          setIsDataEmpty(false);
+          setIsMessagesLoading(false);
+          setMessages(modifiedResponse.data);
+        }
       })
-        .then((response) => {
-          setIsMessagesLoading(false);
-          if (response.data.payload.length > 0 && !param) {
-            setMessages(response.data);
-          } else if (response.data.payload.length > 0 && param) {
-            setMessages((prevState: any) => {
-              return {
-                ...prevState,
-                payload: [...response.data.payload, ...prevState.payload],
-              };
-            });
-            chatContainerRef.current?.scrollTo({
-              top: chatContainerRef.current.scrollHeight - prevScrollHeight,
-            });
-          }
-        })
-        .catch((error) => {
-          setIsMessagesLoading(false);
-          console.log(error);
-        });
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const getMessages = () => {
+    if (messages && messages.payload.length >= 20) {
+      fetchMessages(messages.payload[messages.payload.length - 1].id);
     }
+  };
+
+  const getChannelIcon = () => {
+    const conversation = conversationList.find(
+      (conversation: Conversation) => conversation.id === selectedConversationId
+    );
+    return getIcons(conversation?.meta.channel.slice(9));
+  };
+
+  const goBack = () => {
+    updateDashboardState((prevState: DashBoardState) => {
+      return { ...prevState, selectedConversationId: null };
+    });
+    setMessages(null);
   };
 
   const sendMessage = (data: MessageForm) => {
@@ -155,20 +159,18 @@ const ChatScreen = () => {
     })
       .then((response: any) => {
         setMessages((prevData: any) => {
-          return { ...prevData, payload: [...prevData.payload, response.data] };
+          return { ...prevData, payload: [response.data, ...prevData.payload] };
         });
         setIsMessageSending(false);
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, postedMessageId: response.data.id };
         });
-        setTimeout(() => {
-          chatContainerRef.current?.scrollTo({
-            top: chatContainerRef.current.scrollHeight,
-          });
-        }, 0);
+        chatContainerRef.current?.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+        });
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         setIsMessageSending(false);
       });
     methods.reset();
@@ -187,20 +189,6 @@ const ChatScreen = () => {
       .catch((error) => {
         console.error(error);
       });
-  };
-
-  const goBack = () => {
-    updateDashboardState((prevState: DashBoardState) => {
-      return { ...prevState, selectedConversationId: null };
-    });
-    setMessages(null);
-  };
-
-  const getChannelIcon = () => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === selectedConversationId
-    );
-    return getIcons(conversation?.meta.channel.slice(9));
   };
 
   return (
@@ -253,30 +241,56 @@ const ChatScreen = () => {
           </div>
 
           <div
-            className='flex flex-col px-3 pt-3 h-full overflow-y-auto'
+            className='px-3 pt-3 h-full'
             ref={chatContainerRef}
+            id='scrollableDiv'
+            style={{
+              overflow: 'auto',
+              display: 'flex',
+              flexDirection: 'column-reverse',
+            }}
           >
-            {messages.payload.map((message: any, index: number) => (
-              <div
-                key={index}
-                className={`mb-2 ${
-                  message.message_type === 0
-                    ? 'bg-gray-300 self-start text-dark rounded-r-lg'
-                    : 'bg-blue-500 self-end rounded-l-lg'
-                } p-2 rounded-t-md h-ful whitespace-normal`}
-              >
-                <p className='m-0'>{message.content}</p>
-                <small className='text-xs'>
-                  {new Intl.DateTimeFormat('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true,
-                  }).format(new Date(+message.created_at * 1000))}
+            <InfiniteScroll
+              key={selectedConversationId}
+              dataLength={messages.payload.length ?? 0}
+              next={getMessages}
+              style={{
+                display: 'flex',
+                flexDirection: 'column-reverse',
+                overflow: 'hidden',
+              }}
+              inverse={true}
+              hasMore={true && !isDataEmpty}
+              loader={<></>}
+              scrollableTarget='scrollableDiv'
+              endMessage={
+                <small className='text-center text-[#787f85] font-semibold'>
+                  All messages loaded
                 </small>
-              </div>
-            ))}
+              }
+            >
+              {messages.payload.map((message: any, index: number) => (
+                <div
+                  key={index}
+                  className={`mb-2 ${
+                    message.message_type === 0
+                      ? 'bg-gray-300 self-start text-dark rounded-r-lg'
+                      : 'bg-blue-500 self-end rounded-l-lg'
+                  } p-2 rounded-t-md h-ful whitespace-normal`}
+                >
+                  <p className='m-0'>{message.content}</p>
+                  <small className='text-xs'>
+                    {new Intl.DateTimeFormat('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric',
+                      hour12: true,
+                    }).format(new Date(+message.created_at * 1000))}
+                  </small>
+                </div>
+              ))}
+            </InfiniteScroll>
           </div>
           <div className='position-sticky bottom-0 p-3'>
             <form onSubmit={methods.handleSubmit(sendMessage)}>
@@ -309,4 +323,4 @@ const ChatScreen = () => {
   );
 };
 
-export default ChatScreen;
+export default React.memo(ChatScreen);

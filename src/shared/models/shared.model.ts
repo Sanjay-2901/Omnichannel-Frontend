@@ -43,6 +43,7 @@ export interface DashBoardState {
   postedMessageId: number | null;
   messageSeenId: number | null;
   showInboxes: boolean;
+  searchedMessageId: number | null;
 }
 
 interface MessageData {
