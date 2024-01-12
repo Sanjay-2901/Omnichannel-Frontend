@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { httpRequest } from '../../../utils/axios-utils';
@@ -12,6 +12,7 @@ import {
   DashBoardState,
 } from '../../../shared/models/shared.model';
 import { IoChevronBackSharp } from 'react-icons/io5';
+import { HiOutlineDotsVertical } from 'react-icons/hi';
 
 type MessageForm = {
   message: string;
@@ -49,29 +50,32 @@ const ChatScreen = () => {
   }, [selectedConversationId]);
 
   useEffect(() => {
-    if (messages) {
-      if (messages.payload.length <= 20) {
-        scrollToBottom();
-      }
-    }
-  }, [messages]);
-
-  useEffect(() => {
+    const { receivedMessage, selectedConversationId } = dashBoardState;
     if (
-      dashBoardState.receivedMessage?.conversation_id ===
-        dashBoardState.selectedConversationId &&
+      receivedMessage?.conversation_id === selectedConversationId &&
       messages
     ) {
       updateMessageSeen();
-      setMessages((prevData: any) => {
-        return {
+      const isNewMessage = messages.payload.find(
+        (message: any) => message.id === receivedMessage.id
+      );
+      if (!isNewMessage) {
+        setMessages((prevData: any) => ({
           ...prevData,
-          payload: [dashBoardState.receivedMessage, ...prevData.payload],
-        };
-      });
-      chatContainerRef.current?.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-      });
+          payload: [receivedMessage, ...prevData.payload],
+        }));
+
+        chatContainerRef.current?.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+        });
+      } else {
+        setMessages((prevState: any) => ({
+          ...prevState,
+          payload: prevState.payload.map((message: any) =>
+            message.id === receivedMessage.id ? receivedMessage : message
+          ),
+        }));
+      }
     }
   }, [dashBoardState.receivedMessage]);
 
@@ -115,9 +119,10 @@ const ChatScreen = () => {
             };
           });
         } else {
+          setMessages(modifiedResponse.data);
           setIsDataEmpty(false);
           setIsMessagesLoading(false);
-          setMessages(modifiedResponse.data);
+          scrollToBottom();
         }
       })
       .catch((error) => {
@@ -191,6 +196,22 @@ const ChatScreen = () => {
       });
   };
 
+  const openMessageOptions = (messageId: number) => {
+    console.log(messageId);
+  };
+
+  const deleteMessage = (messageId: number) => {
+    console.log('functionnnn');
+    httpRequest({
+      url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages/${messageId}`,
+      method: 'delete',
+    })
+      .then()
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   return (
     <div className='relative h-100'>
       {!selectedConversationId && !isMessagesLoading && (
@@ -241,7 +262,7 @@ const ChatScreen = () => {
           </div>
 
           <div
-            className='px-3 pt-3 h-full'
+            className='px-3 pt-3 h-full relative'
             ref={chatContainerRef}
             id='scrollableDiv'
             style={{
@@ -269,27 +290,58 @@ const ChatScreen = () => {
                 </small>
               }
             >
-              {messages.payload.map((message: any, index: number) => (
-                <div
-                  key={index}
-                  className={`mb-2 ${
-                    message.message_type === 0
-                      ? 'bg-gray-300 self-start text-dark rounded-r-lg'
-                      : 'bg-blue-500 self-end rounded-l-lg'
-                  } p-2 rounded-t-md h-ful whitespace-normal`}
-                >
-                  <p className='m-0'>{message.content}</p>
-                  <small className='text-xs'>
-                    {new Intl.DateTimeFormat('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: 'numeric',
-                      minute: 'numeric',
-                      hour12: true,
-                    }).format(new Date(+message.created_at * 1000))}
-                  </small>
-                </div>
-              ))}
+              {messages.payload.map((message: any) => {
+                const receivedMessageType = message.message_type === 0;
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex relative ${
+                      receivedMessageType
+                        ? 'self-start'
+                        : 'self-end flex-row-reverse'
+                    }`}
+                  >
+                    <div
+                      className={`mt-2 ${
+                        receivedMessageType
+                          ? 'bg-gray-300  text-dark rounded-r-lg mr-2'
+                          : 'bg-blue-500  rounded-l-lg ml-2'
+                      } p-2 rounded-t-md whitespace-normal`}
+                    >
+                      <p className='m-0'>{message.content}</p>
+                      <small className='text-xs'>
+                        {new Intl.DateTimeFormat('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: 'numeric',
+                          hour12: true,
+                        }).format(new Date(+message.created_at * 1000))}
+                      </small>
+                    </div>
+                    {!message.content_attributes?.deleted && (
+                      <div className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm'>
+                        <HiOutlineDotsVertical
+                          onClick={() => {
+                            openMessageOptions(message.id);
+                          }}
+                        />
+                      </div>
+                    )}
+                    {/* <div
+                      className={`bg-black pl-2 pr-4 py-2 rounded-md absolute -bottom-0 z-10 ${
+                        receivedMessageType ? 'right-0' : 'left-0'
+                      }`}
+                    >
+                      <ul className='p-0 m-0'>
+                        <li>Delete</li>
+                        <li>Delete</li>
+                        <li>Delete</li>
+                      </ul>
+                    </div> */}
+                  </div>
+                );
+              })}
             </InfiniteScroll>
           </div>
           <div className='position-sticky bottom-0 p-3'>

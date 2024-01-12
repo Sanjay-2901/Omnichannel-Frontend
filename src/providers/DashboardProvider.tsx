@@ -63,7 +63,8 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
       const parsedEvent = JSON.parse(event.data);
       if (
         parsedEvent.message?.event === 'message.updated' &&
-        parsedEvent.message?.data.message_type === 0
+        (parsedEvent.message?.data.message_type === 0 ||
+          parsedEvent.message?.data.message_type === 1)
       ) {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, receivedMessage: parsedEvent.message.data };
