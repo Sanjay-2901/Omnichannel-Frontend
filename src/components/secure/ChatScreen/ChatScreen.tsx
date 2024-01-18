@@ -13,6 +13,11 @@ import {
 } from '../../../shared/models/shared.model';
 import { IoChevronBackSharp } from 'react-icons/io5';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
+import { RiDeleteBin6Line } from 'react-icons/ri';
+import { LuCopy } from 'react-icons/lu';
+import { toast } from 'react-toastify';
+import copy from 'clipboard-copy';
+import Alert from '../AlertModal/AlertModal';
 
 type MessageForm = {
   message: string;
@@ -41,6 +46,13 @@ const ChatScreen = () => {
     },
   });
   const { isValid } = methods.formState;
+  const [showMessageOptions, setShowMessageOptions] = useState<number | null>(
+    null
+  );
+  const [showAlert, setShowAlert] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     if (selectedConversationId) {
@@ -78,6 +90,18 @@ const ChatScreen = () => {
       }
     }
   }, [dashBoardState.receivedMessage]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: any) => {
+      if (showMessageOptions && event.target.closest('.message') === null) {
+        setShowMessageOptions(null);
+      }
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => {
+      window.removeEventListener('click', handleOutsideClick);
+    };
+  }, [showMessageOptions]);
 
   const scrollToBottom = () => {
     if (
@@ -197,181 +221,235 @@ const ChatScreen = () => {
   };
 
   const openMessageOptions = (messageId: number) => {
-    console.log(messageId);
+    setShowMessageOptions(messageId);
+    setSelectedMessageId(messageId);
   };
 
-  const deleteMessage = (messageId: number) => {
-    console.log('functionnnn');
+  const deleteMessage = () => {
     httpRequest({
-      url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages/${messageId}`,
+      url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/messages/${selectedMessageId}`,
       method: 'delete',
     })
-      .then()
-      .catch((error) => {
-        console.error(error);
+      .then(() => {
+        toast.success('Message deleted successfully', {
+          autoClose: 1800,
+          hideProgressBar: true,
+        });
+      })
+      .catch(() => {
+        toast.error('Please try again later');
+      })
+      .finally(() => {
+        setShowAlert(false);
       });
   };
 
+  const copyMessage = async (message: string) => {
+    try {
+      await copy(message);
+      toast.success('Message copied to clipboard', {
+        position: 'top-center',
+        autoClose: 1500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: 'light',
+      });
+    } catch {
+      toast.error('Cannot copy message to clipboard');
+    }
+  };
+
   return (
-    <div className='relative h-100'>
-      {!selectedConversationId && !isMessagesLoading && (
-        <div className='center-el text-center'>
-          <div className='flex flex-column items-center'>
-            <IoLogoSnapchat size={70} />
-            <h4>Please select a conversation</h4>
-          </div>
-        </div>
-      )}
-
-      {isMessagesLoading && (
-        <div className='center-el'>
-          <div className='spinner-border spinner-border-md'></div>
-        </div>
-      )}
-
-      {messages && selectedConversationId && (
-        <div className='h-screen flex flex-col'>
-          <div className='flex flex-row items-center bg-[#151718] p-2 position-sticky top-0'>
-            <IoChevronBackSharp
-              onClick={goBack}
-              className='cursor-pointer mr-3 lg:hidden'
-            />
-            <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
-              <h6 className='m-0'>
-                {messages.meta.contact.name
-                  .split(' ')
-                  .map((word: string) => {
-                    if (word) {
-                      return word[0].toUpperCase();
-                    }
-                    return '';
-                  })
-                  .join('')
-                  .slice(0, 2)}
-              </h6>
+    <>
+      <div className='relative h-100'>
+        {!selectedConversationId && !isMessagesLoading && (
+          <div className='center-el text-center'>
+            <div className='flex flex-column items-center'>
+              <IoLogoSnapchat size={70} />
+              <h4>Please select a conversation</h4>
             </div>
-            <div>
-              <h6 className='mb-2'>{messages.meta.contact.name}</h6>
-              <div className='flex items-center'>
-                {getChannelIcon()}
-                <small className='ml-1 text-xs text-[#787f85] font-semibold'>
-                  {getInboxName(selectedConversationId)}
-                </small>
+          </div>
+        )}
+
+        {isMessagesLoading && (
+          <div className='center-el'>
+            <div className='spinner-border spinner-border-md'></div>
+          </div>
+        )}
+
+        {messages && selectedConversationId && (
+          <div className='h-screen flex flex-col'>
+            <div className='flex flex-row items-center bg-[#151718] p-2 position-sticky top-0'>
+              <IoChevronBackSharp
+                onClick={goBack}
+                className='cursor-pointer mr-3 lg:hidden'
+              />
+              <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
+                <h6 className='m-0'>
+                  {messages.meta.contact.name
+                    .split(' ')
+                    .map((word: string) => {
+                      if (word) {
+                        return word[0].toUpperCase();
+                      }
+                      return '';
+                    })
+                    .join('')
+                    .slice(0, 2)}
+                </h6>
+              </div>
+              <div>
+                <h6 className='mb-2'>{messages.meta.contact.name}</h6>
+                <div className='flex items-center'>
+                  {getChannelIcon()}
+                  <small className='ml-1 text-xs text-[#787f85] font-semibold'>
+                    {getInboxName(selectedConversationId)}
+                  </small>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div
-            className='px-3 pt-3 h-full relative'
-            ref={chatContainerRef}
-            id='scrollableDiv'
-            style={{
-              overflow: 'auto',
-              display: 'flex',
-              flexDirection: 'column-reverse',
-            }}
-          >
-            <InfiniteScroll
-              key={selectedConversationId}
-              dataLength={messages.payload.length ?? 0}
-              next={getMessages}
+            <div
+              className='px-3 pt-3 h-full relative'
+              ref={chatContainerRef}
+              id='scrollableDiv'
               style={{
+                overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column-reverse',
-                overflow: 'hidden',
               }}
-              inverse={true}
-              hasMore={true && !isDataEmpty}
-              loader={<></>}
-              scrollableTarget='scrollableDiv'
-              endMessage={
-                <small className='text-center text-[#787f85] font-semibold'>
-                  All messages loaded
-                </small>
-              }
             >
-              {messages.payload.map((message: any) => {
-                const receivedMessageType = message.message_type === 0;
-                return (
-                  <div
-                    key={message.id}
-                    className={`flex relative ${
-                      receivedMessageType
-                        ? 'self-start'
-                        : 'self-end flex-row-reverse'
-                    }`}
-                  >
+              <InfiniteScroll
+                key={selectedConversationId}
+                dataLength={messages.payload.length ?? 0}
+                next={getMessages}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column-reverse',
+                  overflow: 'hidden',
+                }}
+                inverse={true}
+                hasMore={true && !isDataEmpty}
+                loader={<></>}
+                scrollableTarget='scrollableDiv'
+                endMessage={
+                  <small className='text-center text-[#787f85] font-semibold'>
+                    All messages loaded
+                  </small>
+                }
+              >
+                {messages.payload.map((message: any) => {
+                  const receivedMessageType = message.message_type === 0;
+                  return (
                     <div
-                      className={`mt-2 ${
+                      key={message.id}
+                      className={`flex relative ${
                         receivedMessageType
-                          ? 'bg-gray-300  text-dark rounded-r-lg mr-2'
-                          : 'bg-blue-500  rounded-l-lg ml-2'
-                      } p-2 rounded-t-md whitespace-normal`}
+                          ? 'self-start'
+                          : 'self-end flex-row-reverse'
+                      }`}
                     >
-                      <p className='m-0'>{message.content}</p>
-                      <small className='text-xs'>
-                        {new Intl.DateTimeFormat('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: 'numeric',
-                          hour12: true,
-                        }).format(new Date(+message.created_at * 1000))}
-                      </small>
-                    </div>
-                    {!message.content_attributes?.deleted && (
-                      <div className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm'>
-                        <HiOutlineDotsVertical
+                      <div
+                        className={`mt-2 ${
+                          receivedMessageType
+                            ? 'bg-gray-300  text-dark rounded-r-lg mr-2'
+                            : 'bg-blue-500  rounded-l-lg ml-2'
+                        } p-2 rounded-t-md whitespace-normal`}
+                      >
+                        <p className='m-0'>{message.content}</p>
+                        <small className='text-xs'>
+                          {new Intl.DateTimeFormat('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: 'numeric',
+                            hour12: true,
+                          }).format(new Date(+message.created_at * 1000))}
+                        </small>
+                      </div>
+                      {!message.content_attributes?.deleted && (
+                        <div
+                          className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm message'
                           onClick={() => {
                             openMessageOptions(message.id);
                           }}
-                        />
-                      </div>
-                    )}
-                    {/* <div
-                      className={`bg-black pl-2 pr-4 py-2 rounded-md absolute -bottom-0 z-10 ${
-                        receivedMessageType ? 'right-0' : 'left-0'
-                      }`}
-                    >
-                      <ul className='p-0 m-0'>
-                        <li>Delete</li>
-                        <li>Delete</li>
-                        <li>Delete</li>
-                      </ul>
-                    </div> */}
-                  </div>
-                );
-              })}
-            </InfiniteScroll>
+                        >
+                          <HiOutlineDotsVertical />
+                        </div>
+                      )}
+                      {showMessageOptions === message.id && (
+                        <div
+                          className={`bg-[#151718] py-2 rounded-md absolute -bottom-0 z-10 w-28 ${
+                            receivedMessageType ? 'right-0' : 'left-0'
+                          }`}
+                        >
+                          <ul className='p-0 m-0'>
+                            <li
+                              className='py-1 hover:bg-[#292b29] pl-2 pr-3 cursor-pointer flex items-center'
+                              onClick={() => {
+                                setShowAlert(true);
+                              }}
+                            >
+                              <RiDeleteBin6Line />
+                              <small className='pl-1'>Delete</small>
+                            </li>
+                            <li
+                              className='hover:bg-[#292b29] pl-2 pr-3 cursor-pointer flex items-center py-1'
+                              onClick={() => {
+                                copyMessage(message.content);
+                              }}
+                            >
+                              <LuCopy />
+                              <small className='pl-1'>Copy</small>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </InfiniteScroll>
+            </div>
+            <div className='position-sticky bottom-0 p-3'>
+              <form onSubmit={methods.handleSubmit(sendMessage)}>
+                <div className='flex'>
+                  <input
+                    type='text'
+                    id='message'
+                    className='block w-full rounded-tl-md rounded-bl-md py-1.5 pl-5 pr-20 text-gray-900 placeholder:text-gray-500 sm:text-sm sm:leading-6 outline-none border-3 focus:border-blue-500 bg-gray-300'
+                    placeholder='Type to send a message'
+                    {...methods.register('message', {
+                      required: true,
+                    })}
+                    autoComplete='off'
+                  />
+                  <button
+                    type='submit'
+                    className={`rounded-tr-md rounded-br-md  p-1 ${
+                      !isValid
+                        ? 'bg-gray-300 cursor-not-allowed'
+                        : 'bg-blue-400'
+                    }`}
+                    disabled={!isValid || isMessageSending}
+                  >
+                    <IoSendSharp className='text-black h-full' size={25} />
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className='position-sticky bottom-0 p-3'>
-            <form onSubmit={methods.handleSubmit(sendMessage)}>
-              <div className='flex'>
-                <input
-                  type='text'
-                  id='message'
-                  className='block w-full rounded-tl-md rounded-bl-md py-1.5 pl-5 pr-20 text-gray-900 placeholder:text-gray-500 sm:text-sm sm:leading-6 outline-none border-3 focus:border-blue-500 bg-gray-300'
-                  placeholder='Type to send a message'
-                  {...methods.register('message', {
-                    required: true,
-                  })}
-                  autoComplete='off'
-                />
-                <button
-                  type='submit'
-                  className={`rounded-tr-md rounded-br-md  p-1 ${
-                    !isValid ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-400'
-                  }`}
-                  disabled={!isValid || isMessageSending}
-                >
-                  <IoSendSharp className='text-black h-full' size={25} />
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        )}
+      </div>
+      {showAlert && (
+        <Alert
+          message={'Are you sure you want to delete this message?'}
+          confirm={deleteMessage}
+          setShowAlert={setShowAlert}
+        />
       )}
-    </div>
+    </>
   );
 };
 

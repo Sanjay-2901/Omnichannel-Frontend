@@ -5,6 +5,7 @@ import {
 } from '../../shared/models/shared.model';
 import { httpRequest } from '../axios-utils';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type AuthContextType = {
   setLoggedInUser: (loginResponse: LoginResponse) => any;
@@ -39,9 +40,10 @@ export const AuthProvider: React.FC<ChildrenComponentProps> = ({
     })
       .then(() => {
         navigate('/login');
+        toast.success('Logged out successfully');
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        toast.success('Logged out successfully');
         navigate('/login');
       });
     localStorage.clear();
