@@ -232,7 +232,7 @@ const ChatScreen = () => {
     })
       .then(() => {
         toast.success('Message deleted successfully', {
-          autoClose: 1800,
+          autoClose: 2000,
           hideProgressBar: true,
         });
       })
