@@ -8,47 +8,42 @@ import NotFound from './components/public/NotFound/NotFound';
 import DefaultLayout from './components/secure/DefaultLayout/DefaultLayout';
 import Dashboard from './components/secure/Dashboard/Dashboard';
 import DashboardProvider from './providers/DashboardProvider';
+import Search from './components/secure/Search/Search';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route
-          path='/'
-          element={
-            <RequireAuth>
-              <DefaultLayout />
-            </RequireAuth>
-          }
-        >
+    <>
+      <AuthProvider>
+        <Routes>
           <Route
-            path=''
+            path='/'
             element={
-              <DashboardProvider>
-                <Navigate to='/dashboard' />
-              </DashboardProvider>
+              <RequireAuth>
+                <DashboardProvider>
+                  <DefaultLayout />
+                </DashboardProvider>
+              </RequireAuth>
+            }
+          >
+            <Route path='' element={<Navigate to='/dashboard' />} />
+            <Route path='/dashboard' element={<Dashboard />} />
+            <Route path='/search' element={<Search />} />
+          </Route>
+          <Route
+            path='/login'
+            element={
+              <UnAuth>
+                <Login />
+              </UnAuth>
             }
           />
-          <Route
-            path='/dashboard'
-            element={
-              <DashboardProvider>
-                <Dashboard />
-              </DashboardProvider>
-            }
-          />
-        </Route>
-        <Route
-          path='/login'
-          element={
-            <UnAuth>
-              <Login />
-            </UnAuth>
-          }
-        />
-        <Route path='*' element={<NotFound />} />
-      </Routes>
-    </AuthProvider>
+          <Route path='*' element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+      <ToastContainer />
+    </>
   );
 }
 

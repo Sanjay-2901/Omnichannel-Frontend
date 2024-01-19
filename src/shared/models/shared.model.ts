@@ -43,6 +43,7 @@ export interface DashBoardState {
   postedMessageId: number | null;
   messageSeenId: number | null;
   showInboxes: boolean;
+  searchedMessageId: number | null;
 }
 
 interface MessageData {
@@ -238,4 +239,80 @@ interface Message {
     thumbnail: string;
     type: string;
   };
+}
+
+export interface SearchMessageResult {
+  payload: {
+    messages: SearchMessage[];
+  };
+}
+
+export interface SearchMessage {
+  id: number;
+  content: string;
+  message_type: number;
+  content_type: string;
+  source_id: string;
+  inbox_id: number;
+  conversation_id: number;
+  created_at: number;
+  sender: {
+    additional_attributes: {
+      username: string;
+      language_code: string;
+    };
+    custom_attributes: Record<string, unknown>;
+    email: null;
+    id: number;
+    identifier: null;
+    name: string;
+    phone_number: null;
+    thumbnail: string;
+    type: string;
+  };
+  inbox: {
+    id: number;
+    channel_id: number;
+    name: string;
+    channel_type: string;
+  };
+}
+
+export interface SearchConversationResult {
+  payload: {
+    conversations: ConversationResult[];
+  };
+}
+
+export interface ConversationResult {
+  id: number;
+  account_id: number;
+  created_at: number;
+  message: SearchMessage;
+  contact: Contact;
+  inbox: InboxSearch;
+  agent: Agent;
+}
+
+interface Contact {
+  email: null | string;
+  id: number;
+  name: string;
+  phone_number: null | string;
+  identifier: null | string;
+}
+
+interface InboxSearch {
+  id: number;
+  channel_id: number;
+  name: string;
+  channel_type: string;
+}
+
+interface Agent {
+  id: number;
+  available_name: string;
+  email: string;
+  name: string;
+  role: string;
 }

@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type LoginFormData = {
   email: string;
@@ -36,9 +37,10 @@ const Login = () => {
         authContext?.setLoggedInUser(response);
         setIsLoading(false);
         navigate('/dashboard');
+        toast('Logged in successfully', { autoClose: 1700 });
       })
-      .catch((error) => {
-        console.log(error);
+      .catch(() => {
+        toast.error('Invalid username or password');
         setIsLoading(false);
       });
   };

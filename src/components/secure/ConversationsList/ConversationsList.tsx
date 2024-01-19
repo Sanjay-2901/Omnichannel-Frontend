@@ -4,6 +4,8 @@ import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
+import { FaSearch } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ConversationsList = () => {
   const dashboardContext = useDashboardContext();
@@ -16,6 +18,7 @@ const ConversationsList = () => {
     setConversationList,
     getInboxName,
   } = dashboardContext;
+  const navigate = useNavigate();
 
   useEffect(() => {
     httpRequest({
@@ -46,6 +49,10 @@ const ConversationsList = () => {
     });
   };
 
+  const navigateToSearchPage = () => {
+    navigate('/search');
+  };
+
   return (
     <>
       {conversationList && (
@@ -57,6 +64,12 @@ const ConversationsList = () => {
               className='cursor-pointer lg:hidden'
             />
             <h4 className='ml-3 mb-0'>Conversations</h4>
+            <div
+              className='ml-5 bg-[#4c5155] h-8 w-8 rounded-md flex items-center justify-center cursor-pointer'
+              onClick={navigateToSearchPage}
+            >
+              <FaSearch />
+            </div>
           </div>
           <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (

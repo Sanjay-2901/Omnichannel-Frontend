@@ -8,7 +8,7 @@ const client = axios.create({
 export const httpRequest = ({ ...options }) => {
   const authorizationToken = localStorage.getItem('authorization_token');
   if (authorizationToken) {
-    client.defaults.headers.common.Authorization = `Bearer ${authorizationToken}`;
+    client.defaults.headers.common.Authorization = `${authorizationToken}`;
   }
   const onSuccess = (success: any) => success;
   const onError = (error: any) => error;
