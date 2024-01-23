@@ -7,22 +7,18 @@ import { IoLogoSnapchat } from 'react-icons/io';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
-import {
-  Conversation,
-  DashBoardState,
-} from '../../../shared/models/shared.model';
-import { IoChevronBackSharp } from 'react-icons/io5';
+import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { LuCopy } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import copy from 'clipboard-copy';
 import Alert from '../AlertModal/AlertModal';
-import StatusButton from '../StatusButton/StatusButton';
 import {
   SUCCESS_TOAST_CONFIG,
   SUCCESS_TOAST_TOP_CONFIG,
 } from '../../../constants/constants';
+import ChatScreenHeader from '../ChatScreenHeader/ChatScreenHeader';
 
 type MessageForm = {
   message: string;
@@ -31,13 +27,8 @@ type MessageForm = {
 const ChatScreen = () => {
   const [messages, setMessages] = useState<any | null>(null);
   const DashboardContext = useDashboardContext();
-  const {
-    dashBoardState,
-    updateDashboardState,
-    getInboxName,
-    conversationList,
-    getIcons,
-  } = DashboardContext;
+  const { dashBoardState, updateDashboardState, getInboxName } =
+    DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
@@ -166,20 +157,6 @@ const ChatScreen = () => {
     }
   };
 
-  const getChannelIcon = () => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === selectedConversationId
-    );
-    return getIcons(conversation?.meta.channel.slice(9));
-  };
-
-  const goBack = () => {
-    updateDashboardState((prevState: DashBoardState) => {
-      return { ...prevState, selectedConversationId: null };
-    });
-    setMessages(null);
-  };
-
   const sendMessage = (data: MessageForm) => {
     setIsMessageSending(true);
     const messageData = {
@@ -276,37 +253,11 @@ const ChatScreen = () => {
 
         {messages && selectedConversationId && (
           <div className='h-screen flex flex-col'>
-            <div className='flex items-center bg-[#151718] p-2 position-sticky top-0 z-10'>
-              <IoChevronBackSharp
-                onClick={goBack}
-                className='cursor-pointer mr-3 lg:hidden'
-              />
-              <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
-                <h6 className='m-0'>
-                  {messages.meta.contact.name
-                    .split(' ')
-                    .map((word: string) => {
-                      if (word) {
-                        return word[0].toUpperCase();
-                      }
-                      return '';
-                    })
-                    .join('')
-                    .slice(0, 2)}
-                </h6>
-              </div>
-              <div>
-                <h6 className='mb-2'>{messages.meta.contact.name}</h6>
-                <div className='flex items-center'>
-                  {getChannelIcon()}
-                  <small className='ml-1 text-xs text-[#787f85] font-semibold'>
-                    {conversationDetail.inbox_name}
-                  </small>
-                </div>
-              </div>
-              <StatusButton conversationDetail={conversationDetail} />
-            </div>
-
+            <ChatScreenHeader
+              conversationDetail={conversationDetail}
+              messages={messages}
+              setMessages={setMessages}
+            />
             <div
               className='px-3 pt-3 h-full relative'
               ref={chatContainerRef}
@@ -352,11 +303,11 @@ const ChatScreen = () => {
                       <div
                         className={`mt-2 ${
                           receivedMessageType === 0
-                            ? 'bg-gray-300  text-dark rounded-r-lg mr-2'
+                            ? 'bg-gray-300  text-dark rounded-r-lg mr-2 p-2'
                             : receivedMessageType === 1
-                            ? 'bg-blue-500  rounded-l-lg ml-2'
-                            : 'bg-[#687076] flex items-center gap-2 rounded-md'
-                        } p-2 rounded-t-md whitespace-normal`}
+                            ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
+                            : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
+                        } rounded-t-md whitespace-normal`}
                       >
                         <p className='m-0'>{message.content}</p>
                         <small className='text-xs'>
