@@ -26,7 +26,7 @@ const Alert = (props: AlertProps) => {
 
   return (
     <>
-      <div className='fixed top-0 left-0 w-full h-full z-10 bg-[rgba(0,0,0,0.72)]'></div>
+      <div className='fixed top-0 left-0 w-full h-full z-20 bg-[rgba(0,0,0,0.72)]'></div>
       <div
         className={`absolute top-1/3 left-0 right-0 mx-auto rounded-md bg-white p-3 shadow-sm z-20 text-black transition duration-200 ease-in ${opacity} w-4/5 sm:w-1/2 lg:w-1/3 flex flex-col items-center`}
       >
