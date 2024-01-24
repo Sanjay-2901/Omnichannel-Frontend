@@ -40,14 +40,18 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     return icons[channel] || <FaTelegram />;
   };
 
-  const getInboxName = (conversationId: number): any => {
+  const getConversationDetails = (conversationId: number): any => {
     const conversation = conversationList.find(
       (conversation: Conversation) => conversation.id === conversationId
     );
     const inbox: any = inboxList.find(
-      (inbox: Inbox) => inbox.id === conversation.messages[0].inbox_id
+      (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
     );
-    return inbox.name;
+
+    return {
+      inbox_name: inbox?.name,
+      conversation_status: conversation?.status,
+    };
   };
 
   useEffect(() => {
@@ -62,9 +66,10 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
       if (
-        parsedEvent.message?.event === 'message.updated' &&
-        (parsedEvent.message?.data.message_type === 0 ||
-          parsedEvent.message?.data.message_type === 1)
+        (parsedEvent.message?.event === 'message.updated' &&
+          parsedEvent.message?.data.message_type !== 2) ||
+        (parsedEvent.message?.event === 'message.created' &&
+          parsedEvent.message?.data.message_type === 2)
       ) {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, receivedMessage: parsedEvent.message.data };
@@ -123,7 +128,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         conversationList,
         setConversationList,
         getIcons,
-        getInboxName,
+        getConversationDetails,
         debounce,
         formatTimePeriod,
       }}

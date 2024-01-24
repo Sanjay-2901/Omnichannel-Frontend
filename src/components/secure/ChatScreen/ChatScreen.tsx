@@ -7,17 +7,18 @@ import { IoLogoSnapchat } from 'react-icons/io';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
-import {
-  Conversation,
-  DashBoardState,
-} from '../../../shared/models/shared.model';
-import { IoChevronBackSharp } from 'react-icons/io5';
+import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { LuCopy } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import copy from 'clipboard-copy';
 import Alert from '../AlertModal/AlertModal';
+import {
+  SUCCESS_TOAST_CONFIG,
+  SUCCESS_TOAST_TOP_CONFIG,
+} from '../../../constants/constants';
+import ChatScreenHeader from '../ChatScreenHeader/ChatScreenHeader';
 
 type MessageForm = {
   message: string;
@@ -26,13 +27,7 @@ type MessageForm = {
 const ChatScreen = () => {
   const [messages, setMessages] = useState<any | null>(null);
   const DashboardContext = useDashboardContext();
-  const {
-    dashBoardState,
-    updateDashboardState,
-    getInboxName,
-    conversationList,
-    getIcons,
-  } = DashboardContext;
+  const { dashBoardState, updateDashboardState } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
@@ -160,20 +155,6 @@ const ChatScreen = () => {
     }
   };
 
-  const getChannelIcon = () => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === selectedConversationId
-    );
-    return getIcons(conversation?.meta.channel.slice(9));
-  };
-
-  const goBack = () => {
-    updateDashboardState((prevState: DashBoardState) => {
-      return { ...prevState, selectedConversationId: null };
-    });
-    setMessages(null);
-  };
-
   const sendMessage = (data: MessageForm) => {
     setIsMessageSending(true);
     const messageData = {
@@ -231,10 +212,7 @@ const ChatScreen = () => {
       method: 'delete',
     })
       .then(() => {
-        toast.success('Message deleted successfully', {
-          autoClose: 2000,
-          hideProgressBar: true,
-        });
+        toast.success('Message deleted successfully', SUCCESS_TOAST_CONFIG);
       })
       .catch(() => {
         toast.error('Please try again later');
@@ -247,15 +225,7 @@ const ChatScreen = () => {
   const copyMessage = async (message: string) => {
     try {
       await copy(message);
-      toast.success('Message copied to clipboard', {
-        position: 'top-center',
-        autoClose: 1500,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        theme: 'light',
-      });
+      toast.success('Message copied to clipboard', SUCCESS_TOAST_TOP_CONFIG);
     } catch {
       toast.error('Cannot copy message to clipboard');
     }
@@ -274,43 +244,14 @@ const ChatScreen = () => {
         )}
 
         {isMessagesLoading && (
-          <div className='center-el'>
+          <div className='center-el z-30'>
             <div className='spinner-border spinner-border-md'></div>
           </div>
         )}
 
         {messages && selectedConversationId && (
           <div className='h-screen flex flex-col'>
-            <div className='flex flex-row items-center bg-[#151718] p-2 position-sticky top-0'>
-              <IoChevronBackSharp
-                onClick={goBack}
-                className='cursor-pointer mr-3 lg:hidden'
-              />
-              <div className='h-10 w-10 rounded-full bg-[#135899] flex flex-row items-center justify-center mr-3'>
-                <h6 className='m-0'>
-                  {messages.meta.contact.name
-                    .split(' ')
-                    .map((word: string) => {
-                      if (word) {
-                        return word[0].toUpperCase();
-                      }
-                      return '';
-                    })
-                    .join('')
-                    .slice(0, 2)}
-                </h6>
-              </div>
-              <div>
-                <h6 className='mb-2'>{messages.meta.contact.name}</h6>
-                <div className='flex items-center'>
-                  {getChannelIcon()}
-                  <small className='ml-1 text-xs text-[#787f85] font-semibold'>
-                    {getInboxName(selectedConversationId)}
-                  </small>
-                </div>
-              </div>
-            </div>
-
+            <ChatScreenHeader messages={messages} setMessages={setMessages} />
             <div
               className='px-3 pt-3 h-full relative'
               ref={chatContainerRef}
@@ -341,22 +282,26 @@ const ChatScreen = () => {
                 }
               >
                 {messages.payload.map((message: any) => {
-                  const receivedMessageType = message.message_type === 0;
+                  const receivedMessageType = message.message_type;
                   return (
                     <div
                       key={message.id}
                       className={`flex relative ${
-                        receivedMessageType
+                        receivedMessageType === 0
                           ? 'self-start'
-                          : 'self-end flex-row-reverse'
+                          : receivedMessageType === 1
+                          ? 'self-end flex-row-reverse'
+                          : 'self-center'
                       }`}
                     >
                       <div
                         className={`mt-2 ${
-                          receivedMessageType
-                            ? 'bg-gray-300  text-dark rounded-r-lg mr-2'
-                            : 'bg-blue-500  rounded-l-lg ml-2'
-                        } p-2 rounded-t-md whitespace-normal`}
+                          receivedMessageType === 0
+                            ? 'bg-gray-300  text-dark rounded-r-lg mr-2 p-2'
+                            : receivedMessageType === 1
+                            ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
+                            : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
+                        } rounded-t-md whitespace-normal`}
                       >
                         <p className='m-0'>{message.content}</p>
                         <small className='text-xs'>
@@ -369,20 +314,21 @@ const ChatScreen = () => {
                           }).format(new Date(+message.created_at * 1000))}
                         </small>
                       </div>
-                      {!message.content_attributes?.deleted && (
-                        <div
-                          className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm message'
-                          onClick={() => {
-                            openMessageOptions(message.id);
-                          }}
-                        >
-                          <HiOutlineDotsVertical />
-                        </div>
-                      )}
+                      {!message.content_attributes?.deleted &&
+                        receivedMessageType !== 2 && (
+                          <div
+                            className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm message'
+                            onClick={() => {
+                              openMessageOptions(message.id);
+                            }}
+                          >
+                            <HiOutlineDotsVertical />
+                          </div>
+                        )}
                       {showMessageOptions === message.id && (
                         <div
                           className={`bg-[#151718] py-2 rounded-md absolute -bottom-0 z-10 w-28 ${
-                            receivedMessageType ? 'right-0' : 'left-0'
+                            receivedMessageType === 0 ? 'right-0' : 'left-0'
                           }`}
                         >
                           <ul className='p-0 m-0'>

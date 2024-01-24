@@ -16,7 +16,7 @@ const ConversationsList = () => {
     getIcons,
     conversationList,
     setConversationList,
-    getInboxName,
+    getConversationDetails,
   } = dashboardContext;
   const navigate = useNavigate();
 
@@ -28,6 +28,7 @@ const ConversationsList = () => {
       method: 'get',
       params: {
         inbox_id: dashboardContext.dashBoardState.selectedInboxId,
+        status: 'all',
       },
     })
       .then((response) => {
@@ -107,7 +108,7 @@ const ConversationsList = () => {
                       <div className='flex items-center mb-2'>
                         {getIcons(conversation.meta.channel.slice(9))}
                         <small className='text-[#787f85] text-xs font-semibold ml-1'>
-                          {getInboxName(conversation.id)}
+                          {getConversationDetails(conversation.id).inbox_name}
                         </small>
                       </div>
                       <h6 className='mb-1'>{conversation.meta.sender.name}</h6>
