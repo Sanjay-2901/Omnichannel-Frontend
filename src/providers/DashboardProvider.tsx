@@ -40,7 +40,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     return icons[channel] || <FaTelegram />;
   };
 
-  const getInboxName = (conversationId: number): any => {
+  const getConversationDetails = (conversationId: number): any => {
     const conversation = conversationList.find(
       (conversation: Conversation) => conversation.id === conversationId
     );
@@ -128,7 +128,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         conversationList,
         setConversationList,
         getIcons,
-        getInboxName,
+        getConversationDetails,
         debounce,
         formatTimePeriod,
       }}

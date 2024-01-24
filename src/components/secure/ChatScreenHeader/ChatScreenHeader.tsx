@@ -14,14 +14,20 @@ import {
 } from '../../../shared/models/shared.model';
 
 const ChatScreenHeader = (props: any) => {
-  const { conversationDetail, messages, setMessages } = props;
+  const { messages, setMessages } = props;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
   const DashboardContext = useDashboardContext();
-  const { dashBoardState, conversationList, getIcons, updateDashboardState } =
-    DashboardContext;
+  const {
+    dashBoardState,
+    conversationList,
+    getIcons,
+    updateDashboardState,
+    getConversationDetails,
+  } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const [isLoading, setIsLoading] = useState(false);
+  const conversationDetail = getConversationDetails(selectedConversationId);
 
   const toggleStatus = (status: string | null = null): void => {
     setIsLoading(true);
