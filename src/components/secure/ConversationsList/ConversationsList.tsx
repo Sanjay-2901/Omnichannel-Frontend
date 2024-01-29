@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
@@ -19,6 +19,7 @@ const ConversationsList = () => {
     getConversationDetails,
   } = dashboardContext;
   const navigate = useNavigate();
+  const assigneeTypeButtons = ['Mine', 'Unassigned', 'All'];
 
   useEffect(() => {
     httpRequest({
@@ -28,6 +29,10 @@ const ConversationsList = () => {
       method: 'get',
       params: {
         inbox_id: dashboardContext.dashBoardState.selectedInboxId,
+        assignee_type:
+          dashBoardState.assigneeType === 'Mine'
+            ? 'me'
+            : dashBoardState.assigneeType.toLowerCase(),
         status: 'all',
       },
     })
@@ -42,6 +47,7 @@ const ConversationsList = () => {
     dashBoardState.postedMessageId,
     dashBoardState.messageSeenId,
     dashBoardState.receivedMessage,
+    dashBoardState.assigneeType,
   ]);
 
   const toggleInboxes = () => {
@@ -52,6 +58,16 @@ const ConversationsList = () => {
 
   const navigateToSearchPage = () => {
     navigate('/search');
+  };
+
+  const changeAssigneeType = (assigneeType: string) => {
+    updateDashboardState((prevState: DashBoardState) => {
+      return {
+        ...prevState,
+        assigneeType: assigneeType,
+        selectedConversationId: null,
+      };
+    });
   };
 
   return (
@@ -71,6 +87,27 @@ const ConversationsList = () => {
             >
               <FaSearch />
             </div>
+          </div>
+          <div className='mb-2 flex'>
+            {assigneeTypeButtons.map((buttonName: string, index: number) => {
+              return (
+                <div
+                  key={index}
+                  className={`${
+                    dashBoardState.assigneeType === buttonName &&
+                    'text-[#369eff] border-b-2 border-[#369eff]'
+                  } mr-4 pb-1`}
+                >
+                  <button
+                    onClick={() => {
+                      changeAssigneeType(buttonName);
+                    }}
+                  >
+                    {buttonName}
+                  </button>
+                </div>
+              );
+            })}
           </div>
           <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
@@ -136,4 +173,4 @@ const ConversationsList = () => {
   );
 };
 
-export default ConversationsList;
+export default React.memo(ConversationsList);

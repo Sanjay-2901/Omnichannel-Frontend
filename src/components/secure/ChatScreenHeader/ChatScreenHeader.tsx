@@ -8,10 +8,7 @@ import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { toast } from 'react-toastify';
 import { SUCCESS_TOAST_CONFIG } from '../../../constants/constants';
 import { IoChevronBackSharp } from 'react-icons/io5';
-import {
-  Conversation,
-  DashBoardState,
-} from '../../../shared/models/shared.model';
+import { DashBoardState } from '../../../shared/models/shared.model';
 
 const ChatScreenHeader = (props: any) => {
   const { messages, setMessages } = props;
@@ -20,7 +17,6 @@ const ChatScreenHeader = (props: any) => {
   const DashboardContext = useDashboardContext();
   const {
     dashBoardState,
-    conversationList,
     getIcons,
     updateDashboardState,
     getConversationDetails,
@@ -28,7 +24,6 @@ const ChatScreenHeader = (props: any) => {
   const { selectedConversationId } = dashBoardState;
   const [isLoading, setIsLoading] = useState(false);
   const conversationDetail = getConversationDetails(selectedConversationId);
-
   const toggleStatus = (status: string | null = null): void => {
     setIsLoading(true);
     httpRequest({
@@ -45,13 +40,6 @@ const ChatScreenHeader = (props: any) => {
       .finally(() => {
         setIsLoading(false);
       });
-  };
-
-  const getChannelIcon = () => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === selectedConversationId
-    );
-    return getIcons(conversation?.meta.channel.slice(9));
   };
 
   const goBack = () => {
@@ -85,9 +73,9 @@ const ChatScreenHeader = (props: any) => {
         <div>
           <h6 className='mb-2'>{messages.meta.contact.name}</h6>
           <div className='flex items-center'>
-            {getChannelIcon()}
+            {getIcons(conversationDetail?.channel_type)}
             <small className='ml-1 text-xs text-[#787f85] font-semibold'>
-              {conversationDetail.inbox_name}
+              {conversationDetail?.inbox_name}
             </small>
           </div>
         </div>

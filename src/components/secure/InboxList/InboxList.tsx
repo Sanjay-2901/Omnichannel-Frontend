@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
 import { BsFillInboxesFill } from 'react-icons/bs';
-import './InboxList.scss';
 
 const InboxList = () => {
   const authContext = useAuthContext();
@@ -89,4 +88,4 @@ const InboxList = () => {
   );
 };
 
-export default InboxList;
+export default React.memo(InboxList);

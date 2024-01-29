@@ -10,6 +10,7 @@ import { useAuthContext } from '../utils/auth/AuthProvider';
 import { FaTelegram } from 'react-icons/fa';
 import { MdOutlineMail } from 'react-icons/md';
 import { TbWorldWww } from 'react-icons/tb';
+import React from 'react';
 
 const DashboardContext = createContext<null | any>(null);
 const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
@@ -26,6 +27,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     messageSeenId: null,
     showInboxes: false,
     searchedMessageId: null,
+    assigneeType: 'Mine',
   });
   const [inboxList, setInboxList] = useState([]);
   const [conversationList, setConversationList] = useState<any>([]);
@@ -41,17 +43,19 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
   };
 
   const getConversationDetails = (conversationId: number): any => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === conversationId
-    );
-    const inbox: any = inboxList.find(
-      (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
-    );
-
-    return {
-      inbox_name: inbox?.name,
-      conversation_status: conversation?.status,
-    };
+    if (conversationList.length > 0 && inboxList.length > 0) {
+      const conversation: Conversation = conversationList.find(
+        (conversation: Conversation) => conversation.id === conversationId
+      );
+      const inbox: any = inboxList.find(
+        (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
+      );
+      return {
+        inbox_name: inbox?.name,
+        conversation_status: conversation?.status,
+        channel_type: conversation?.meta.channel.slice(9),
+      };
+    }
   };
 
   useEffect(() => {
@@ -142,4 +146,4 @@ export const useDashboardContext = () => {
   return useContext(DashboardContext);
 };
 
-export default DashboardProvider;
+export default React.memo(DashboardProvider);

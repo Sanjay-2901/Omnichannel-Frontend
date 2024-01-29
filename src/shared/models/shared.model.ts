@@ -44,6 +44,13 @@ export interface DashBoardState {
   messageSeenId: number | null;
   showInboxes: boolean;
   searchedMessageId: number | null;
+  assigneeType: string;
+}
+
+export interface ConversationDetail {
+  inbox_name: string;
+  conversation_status: string;
+  channel_type: string;
 }
 
 interface MessageData {
