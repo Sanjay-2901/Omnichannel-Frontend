@@ -15,15 +15,10 @@ const ChatScreenHeader = (props: any) => {
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
   const DashboardContext = useDashboardContext();
-  const {
-    dashBoardState,
-    getIcons,
-    updateDashboardState,
-    getConversationDetails,
-  } = DashboardContext;
+  const { dashBoardState, getIcons, updateDashboardState, conversationDetail } =
+    DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const [isLoading, setIsLoading] = useState(false);
-  const conversationDetail = getConversationDetails(selectedConversationId);
   const toggleStatus = (status: string | null = null): void => {
     setIsLoading(true);
     httpRequest({

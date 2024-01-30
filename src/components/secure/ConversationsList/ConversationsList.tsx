@@ -50,22 +50,21 @@ const ConversationsList = () => {
     dashBoardState.assigneeType,
   ]);
 
-  const toggleInboxes = () => {
+  const toggleInboxes = (): void => {
     updateDashboardState((prevState: DashBoardState) => {
       return { ...prevState, showInboxes: !prevState.showInboxes };
     });
   };
 
-  const navigateToSearchPage = () => {
+  const navigateToSearchPage = (): void => {
     navigate('/search');
   };
 
-  const changeAssigneeType = (assigneeType: string) => {
+  const changeAssigneeType = (assigneeType: string): void => {
     updateDashboardState((prevState: DashBoardState) => {
       return {
         ...prevState,
         assigneeType: assigneeType,
-        selectedConversationId: null,
       };
     });
   };

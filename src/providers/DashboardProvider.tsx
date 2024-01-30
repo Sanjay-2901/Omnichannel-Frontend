@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import {
   ChildrenComponentProps,
   Conversation,
+  ConversationDetail,
   DashBoardState,
   IconKey,
   Inbox,
@@ -31,12 +32,21 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
   });
   const [inboxList, setInboxList] = useState([]);
   const [conversationList, setConversationList] = useState<any>([]);
+  const [conversationDetail, setConversationDetail] =
+    useState<null | ConversationDetail>(null);
 
   const icons = {
     Telegram: <FaTelegram />,
     Email: <MdOutlineMail />,
     WebWidget: <TbWorldWww />,
   };
+
+  useEffect(() => {
+    if (dashBoardState.selectedConversationId)
+      setConversationDetail(
+        getConversationDetails(dashBoardState.selectedConversationId)
+      );
+  }, [conversationList, dashBoardState.selectedConversationId]);
 
   const getIcons = (channel: IconKey): any => {
     return icons[channel] || <FaTelegram />;
@@ -50,11 +60,15 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
       const inbox: any = inboxList.find(
         (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
       );
-      return {
-        inbox_name: inbox?.name,
-        conversation_status: conversation?.status,
-        channel_type: conversation?.meta.channel.slice(9),
-      };
+      if (conversation && inbox) {
+        return {
+          inbox_name: inbox?.name,
+          conversation_status: conversation?.status,
+          channel_type: conversation?.meta.channel.slice(9),
+        };
+      } else {
+        return conversationDetail;
+      }
     }
   };
 
@@ -135,6 +149,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         getConversationDetails,
         debounce,
         formatTimePeriod,
+        conversationDetail,
       }}
     >
       {children}
