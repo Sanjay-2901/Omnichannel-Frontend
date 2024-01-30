@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import {
   ChildrenComponentProps,
   Conversation,
@@ -41,35 +47,43 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     WebWidget: <TbWorldWww />,
   };
 
+  const getConversationDetails = useCallback(
+    (conversationId: number): undefined | ConversationDetail => {
+      if (conversationList.length > 0 && inboxList.length > 0) {
+        const conversation: Conversation = conversationList.find(
+          (conversation: Conversation) => conversation.id === conversationId
+        );
+        const inbox: any = inboxList.find(
+          (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
+        );
+        if (conversation && inbox) {
+          return {
+            inbox_name: inbox?.name,
+            channel_type: conversation?.meta.channel.slice(9),
+            conversation_status: conversation?.status,
+          };
+        }
+      }
+    },
+    [conversationList, inboxList]
+  );
+
   useEffect(() => {
-    if (dashBoardState.selectedConversationId)
-      setConversationDetail(
-        getConversationDetails(dashBoardState.selectedConversationId)
-      );
-  }, [conversationList, dashBoardState.selectedConversationId]);
+    if (!dashBoardState.selectedConversationId) return;
+    const conversationDetail = getConversationDetails(
+      dashBoardState.selectedConversationId
+    );
+    if (conversationDetail) {
+      setConversationDetail(conversationDetail);
+    }
+  }, [
+    conversationList,
+    dashBoardState.selectedConversationId,
+    getConversationDetails,
+  ]);
 
   const getIcons = (channel: IconKey): any => {
     return icons[channel] || <FaTelegram />;
-  };
-
-  const getConversationDetails = (conversationId: number): any => {
-    if (conversationList.length > 0 && inboxList.length > 0) {
-      const conversation: Conversation = conversationList.find(
-        (conversation: Conversation) => conversation.id === conversationId
-      );
-      const inbox: any = inboxList.find(
-        (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
-      );
-      if (conversation && inbox) {
-        return {
-          inbox_name: inbox?.name,
-          conversation_status: conversation?.status,
-          channel_type: conversation?.meta.channel.slice(9),
-        };
-      } else {
-        return conversationDetail;
-      }
-    }
   };
 
   useEffect(() => {
@@ -140,16 +154,16 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     <DashboardContext.Provider
       value={{
         dashBoardState,
-        updateDashboardState,
         inboxList,
-        setInboxList,
         conversationList,
+        conversationDetail,
+        updateDashboardState,
+        setInboxList,
         setConversationList,
         getIcons,
         getConversationDetails,
         debounce,
         formatTimePeriod,
-        conversationDetail,
       }}
     >
       {children}
