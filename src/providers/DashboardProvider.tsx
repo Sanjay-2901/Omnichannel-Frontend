@@ -38,6 +38,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     searchedMessageId: null,
     assigneeType: 'Mine',
   });
+  const [messages, setMessages] = useState<any | null>(null);
   const [inboxList, setInboxList] = useState([]);
   const [conversationList, setConversationList] = useState<any>([]);
   const [conversationDetail, setConversationDetail] =
@@ -157,6 +158,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         inboxList,
         conversationList,
         conversationDetail,
+        messages,
         updateDashboardState,
         setInboxList,
         setConversationList,
@@ -165,6 +167,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         debounce,
         formatTimePeriod,
         setConversationDetail,
+        setMessages,
       }}
     >
       {children}

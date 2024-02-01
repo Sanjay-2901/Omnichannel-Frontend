@@ -25,9 +25,9 @@ type MessageForm = {
 };
 
 const ChatScreen = () => {
-  const [messages, setMessages] = useState<any | null>(null);
   const DashboardContext = useDashboardContext();
-  const { dashBoardState, updateDashboardState } = DashboardContext;
+  const { dashBoardState, updateDashboardState, messages, setMessages } =
+    DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
@@ -251,7 +251,7 @@ const ChatScreen = () => {
 
         {messages && selectedConversationId && (
           <div className='h-screen flex flex-col'>
-            <ChatScreenHeader messages={messages} setMessages={setMessages} />
+            <ChatScreenHeader />
             <div
               className='px-3 pt-3 h-full relative'
               ref={chatContainerRef}

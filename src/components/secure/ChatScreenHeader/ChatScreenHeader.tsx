@@ -13,8 +13,7 @@ import {
   DashBoardState,
 } from '../../../shared/models/shared.model';
 
-const ChatScreenHeader = (props: any) => {
-  const { messages, setMessages } = props;
+const ChatScreenHeader = () => {
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
   const DashboardContext = useDashboardContext();
@@ -24,6 +23,8 @@ const ChatScreenHeader = (props: any) => {
     updateDashboardState,
     conversationDetail,
     setConversationDetail,
+    messages,
+    setMessages,
   } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const [isLoading, setIsLoading] = useState(false);
