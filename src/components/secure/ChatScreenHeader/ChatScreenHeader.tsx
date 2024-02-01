@@ -8,17 +8,26 @@ import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { toast } from 'react-toastify';
 import { SUCCESS_TOAST_CONFIG } from '../../../constants/constants';
 import { IoChevronBackSharp } from 'react-icons/io5';
-import { DashBoardState } from '../../../shared/models/shared.model';
+import {
+  ConversationDetail,
+  DashBoardState,
+} from '../../../shared/models/shared.model';
 
 const ChatScreenHeader = (props: any) => {
   const { messages, setMessages } = props;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
   const DashboardContext = useDashboardContext();
-  const { dashBoardState, getIcons, updateDashboardState, conversationDetail } =
-    DashboardContext;
+  const {
+    dashBoardState,
+    getIcons,
+    updateDashboardState,
+    conversationDetail,
+    setConversationDetail,
+  } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const [isLoading, setIsLoading] = useState(false);
+
   const toggleStatus = (status: string | null = null): void => {
     setIsLoading(true);
     httpRequest({
@@ -26,7 +35,13 @@ const ChatScreenHeader = (props: any) => {
       method: 'post',
       params: { status },
     })
-      .then(() => {
+      .then((response) => {
+        setConversationDetail((prevState: ConversationDetail) => {
+          return {
+            ...prevState,
+            conversation_status: response.data.payload.current_status,
+          };
+        });
         toast.success('Status changed successfully', SUCCESS_TOAST_CONFIG);
       })
       .catch(() => {

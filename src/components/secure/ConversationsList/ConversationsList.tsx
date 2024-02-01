@@ -2,7 +2,10 @@ import React, { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
-import { DashBoardState } from '../../../shared/models/shared.model';
+import {
+  Conversation,
+  DashBoardState,
+} from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
 import { FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
@@ -110,7 +113,7 @@ const ConversationsList = () => {
           </div>
           <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
-              conversationList.map((conversation: any) => (
+              conversationList.map((conversation: Conversation) => (
                 <li
                   key={conversation.id}
                   className={`${
@@ -148,7 +151,16 @@ const ConversationsList = () => {
                         </small>
                       </div>
                       <h6 className='mb-1'>{conversation.meta.sender.name}</h6>
-                      <p className='m-0'>{conversation.messages[0].content}</p>
+                      <p className='m-0'>
+                        {conversation?.last_non_activity_message?.content &&
+                          (conversation.last_non_activity_message.content
+                            .length < 45
+                            ? conversation.last_non_activity_message.content
+                            : `${conversation.last_non_activity_message.content.slice(
+                                0,
+                                45
+                              )}...`)}
+                      </p>
                     </div>
                   </div>
                   {+conversation.messages[0].conversation.unread_count > 0 && (

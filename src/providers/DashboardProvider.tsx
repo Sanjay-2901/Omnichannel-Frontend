@@ -164,6 +164,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         getConversationDetails,
         debounce,
         formatTimePeriod,
+        setConversationDetail,
       }}
     >
       {children}
