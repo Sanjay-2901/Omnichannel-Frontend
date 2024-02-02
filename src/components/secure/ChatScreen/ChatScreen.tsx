@@ -26,8 +26,13 @@ type MessageForm = {
 
 const ChatScreen = () => {
   const DashboardContext = useDashboardContext();
-  const { dashBoardState, updateDashboardState, messages, setMessages } =
-    DashboardContext;
+  const {
+    dashBoardState,
+    messages,
+    setMessages,
+    replaceConversation,
+    replaceConversationToTop,
+  } = DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
@@ -171,16 +176,18 @@ const ChatScreen = () => {
         setMessages((prevData: any) => {
           return { ...prevData, payload: [response.data, ...prevData.payload] };
         });
-        setIsMessageSending(false);
-        updateDashboardState((prevState: DashBoardState) => {
-          return { ...prevState, postedMessageId: response.data.id };
-        });
+        replaceConversationToTop(
+          response.data.conversation_id,
+          response.data.content
+        );
         chatContainerRef.current?.scrollTo({
           top: chatContainerRef.current.scrollHeight,
         });
       })
       .catch((error) => {
         console.error(error);
+      })
+      .finally(() => {
         setIsMessageSending(false);
       });
     methods.reset();
@@ -192,9 +199,7 @@ const ChatScreen = () => {
       method: 'post',
     })
       .then((response) => {
-        updateDashboardState((prevState: DashBoardState) => {
-          return { ...prevState, messageSeenId: response.data.id };
-        });
+        replaceConversation(response.data);
       })
       .catch((error) => {
         console.error(error);

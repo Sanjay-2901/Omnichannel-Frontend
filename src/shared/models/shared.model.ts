@@ -40,8 +40,6 @@ export interface DashBoardState {
   selectedInboxId: number | null;
   selectedConversationId: number | null;
   receivedMessage: WebSocketMessage | null;
-  postedMessageId: number | null;
-  messageSeenId: number | null;
   showInboxes: boolean;
   searchedMessageId: number | null;
   assigneeType: string;

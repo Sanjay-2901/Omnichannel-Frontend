@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
@@ -49,10 +49,8 @@ const ConversationsList = () => {
       .finally(() => {});
   }, [
     dashBoardState.selectedInboxId,
-    dashBoardState.postedMessageId,
-    dashBoardState.messageSeenId,
-    dashBoardState.receivedMessage,
     dashBoardState.assigneeType,
+    dashBoardState.receivedMessage,
   ]);
 
   const toggleInboxes = (): void => {

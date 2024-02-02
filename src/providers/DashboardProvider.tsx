@@ -32,15 +32,15 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     selectedInboxId: null,
     selectedConversationId: null,
     receivedMessage: null,
-    postedMessageId: null,
-    messageSeenId: null,
     showInboxes: false,
     searchedMessageId: null,
     assigneeType: 'Mine',
   });
   const [messages, setMessages] = useState<any | null>(null);
   const [inboxList, setInboxList] = useState([]);
-  const [conversationList, setConversationList] = useState<any>([]);
+  const [conversationList, setConversationList] = useState<
+    Conversation[] | any
+  >([]);
   const [conversationDetail, setConversationDetail] =
     useState<null | ConversationDetail>(null);
 
@@ -68,6 +68,42 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     },
     [conversationList, inboxList]
   );
+
+  const replaceConversation = (conversation: Conversation): void => {
+    setConversationList((prevState: Conversation[]) => {
+      const index = prevState.findIndex((conversationItem: Conversation) => {
+        return conversationItem.id === conversation.id;
+      });
+      if (index !== 1) {
+        const newList = [...prevState];
+        newList[index] = conversation;
+        return newList;
+      } else {
+        return prevState;
+      }
+    });
+  };
+
+  const replaceConversationToTop = (
+    conversationId: number,
+    newContent: string
+  ) => {
+    setConversationList((prevState: Conversation[]) => {
+      const index = prevState.findIndex((conversationItem: Conversation) => {
+        return conversationItem.id === conversationId;
+      });
+      if (index !== -1) {
+        const newList = [...prevState];
+        const conversationToUpdate = { ...newList[index] };
+        conversationToUpdate.last_non_activity_message.content = newContent;
+        newList.splice(index, 1);
+        newList.unshift(conversationToUpdate);
+        return newList;
+      } else {
+        return prevState;
+      }
+    });
+  };
 
   useEffect(() => {
     if (!dashBoardState.selectedConversationId) return;
@@ -168,6 +204,8 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         formatTimePeriod,
         setConversationDetail,
         setMessages,
+        replaceConversation,
+        replaceConversationToTop,
       }}
     >
       {children}
