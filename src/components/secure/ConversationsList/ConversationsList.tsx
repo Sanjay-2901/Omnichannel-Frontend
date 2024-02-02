@@ -1,11 +1,15 @@
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
-import { DashBoardState } from '../../../shared/models/shared.model';
+import {
+  Conversation,
+  DashBoardState,
+} from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
 import { FaSearch } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { LuInfo } from 'react-icons/lu';
 
 const ConversationsList = () => {
   const dashboardContext = useDashboardContext();
@@ -19,6 +23,7 @@ const ConversationsList = () => {
     getConversationDetails,
   } = dashboardContext;
   const navigate = useNavigate();
+  const assigneeTypeButtons = ['Mine', 'Unassigned', 'All'];
 
   useEffect(() => {
     httpRequest({
@@ -28,6 +33,10 @@ const ConversationsList = () => {
       method: 'get',
       params: {
         inbox_id: dashboardContext.dashBoardState.selectedInboxId,
+        assignee_type:
+          dashBoardState.assigneeType === 'Mine'
+            ? 'me'
+            : dashBoardState.assigneeType.toLowerCase(),
         status: 'all',
       },
     })
@@ -36,22 +45,33 @@ const ConversationsList = () => {
       })
       .catch((error) => {
         console.error(error);
-      });
+      })
+      .finally(() => {});
   }, [
     dashBoardState.selectedInboxId,
     dashBoardState.postedMessageId,
     dashBoardState.messageSeenId,
     dashBoardState.receivedMessage,
+    dashBoardState.assigneeType,
   ]);
 
-  const toggleInboxes = () => {
+  const toggleInboxes = (): void => {
     updateDashboardState((prevState: DashBoardState) => {
       return { ...prevState, showInboxes: !prevState.showInboxes };
     });
   };
 
-  const navigateToSearchPage = () => {
+  const navigateToSearchPage = (): void => {
     navigate('/search');
+  };
+
+  const changeAssigneeType = (assigneeType: string): void => {
+    updateDashboardState((prevState: DashBoardState) => {
+      return {
+        ...prevState,
+        assigneeType: assigneeType,
+      };
+    });
   };
 
   return (
@@ -72,9 +92,30 @@ const ConversationsList = () => {
               <FaSearch />
             </div>
           </div>
+          <div className='mb-2 flex'>
+            {assigneeTypeButtons.map((buttonName: string, index: number) => {
+              return (
+                <div
+                  key={index}
+                  className={`${
+                    dashBoardState.assigneeType === buttonName &&
+                    'text-[#369eff] border-b-2 border-[#369eff]'
+                  } mr-4 pb-1`}
+                >
+                  <button
+                    onClick={() => {
+                      changeAssigneeType(buttonName);
+                    }}
+                  >
+                    {buttonName}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
           <ul className='p-0 m-0 overflow-y-scroll h-full'>
             {conversationList.length > 0 ? (
-              conversationList.map((conversation: any) => (
+              conversationList.map((conversation: Conversation) => (
                 <li
                   key={conversation.id}
                   className={`${
@@ -112,7 +153,16 @@ const ConversationsList = () => {
                         </small>
                       </div>
                       <h6 className='mb-1'>{conversation.meta.sender.name}</h6>
-                      <p className='m-0'>{conversation.messages[0].content}</p>
+                      <p className='m-0'>
+                        {conversation?.last_non_activity_message?.content &&
+                          (conversation.last_non_activity_message.content
+                            .length < 45
+                            ? conversation.last_non_activity_message.content
+                            : `${conversation.last_non_activity_message.content.slice(
+                                0,
+                                45
+                              )}...`)}
+                      </p>
                     </div>
                   </div>
                   {+conversation.messages[0].conversation.unread_count > 0 && (
@@ -127,7 +177,10 @@ const ConversationsList = () => {
                 </li>
               ))
             ) : (
-              <h6 className='mt-5 text-center'>No conversations found</h6>
+              <div>
+                <LuInfo className='mx-auto mt-5' size={30} />
+                <h6 className='mt-3 text-center'>No conversations found</h6>
+              </div>
             )}
           </ul>
         </div>
@@ -136,4 +189,4 @@ const ConversationsList = () => {
   );
 };
 
-export default ConversationsList;
+export default React.memo(ConversationsList);

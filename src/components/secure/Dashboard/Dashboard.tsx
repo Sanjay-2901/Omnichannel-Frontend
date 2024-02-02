@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import ChatScreen from '../ChatScreen/ChatScreen';
 import ConversationsList from '../ConversationsList/ConversationsList';
@@ -55,4 +55,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default React.memo(Dashboard);

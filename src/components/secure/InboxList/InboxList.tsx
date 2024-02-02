@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthContext } from '../../../utils/auth/AuthProvider';
 import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import { DashBoardState } from '../../../shared/models/shared.model';
 import { BsFillInboxesFill } from 'react-icons/bs';
-import './InboxList.scss';
 
 const InboxList = () => {
   const authContext = useAuthContext();
@@ -15,6 +14,8 @@ const InboxList = () => {
     inboxList,
     setInboxList,
     getIcons,
+    setConversationDetail,
+    setMessages,
   } = dashboardContext;
 
   useEffect(() => {
@@ -26,16 +27,19 @@ const InboxList = () => {
     }).then((response) => {
       setInboxList(response.data.payload);
     });
-  }, []);
+  }, [authContext, setInboxList]);
 
-  const getAllConversations = () => {
-    updateDashboardState((prevState: DashBoardState) => {
+  const getConversations = (inboxId = null) => {
+    updateDashboardState((prevDashboardState: DashBoardState) => {
       return {
-        ...prevState,
-        selectedInboxId: null,
+        ...prevDashboardState,
+        selectedInboxId: inboxId,
         selectedConversationId: null,
       };
     });
+
+    setConversationDetail(null);
+    setMessages(null);
   };
 
   return (
@@ -48,7 +52,9 @@ const InboxList = () => {
               className={`cursor-pointer p-1 rounded-md hover:bg-[#26292B] mb-1 flex flex-row items-center font-semibold ${
                 !dashBoardState.selectedInboxId && 'bg-[#26292B]'
               }`}
-              onClick={getAllConversations}
+              onClick={() => {
+                getConversations();
+              }}
             >
               <span className='pr-2'>
                 <BsFillInboxesFill />
@@ -65,13 +71,7 @@ const InboxList = () => {
                   'bg-[#26292B]'
                 }`}
                 onClick={() => {
-                  updateDashboardState((prevDashboardState: DashBoardState) => {
-                    return {
-                      ...prevDashboardState,
-                      selectedInboxId: inboxItem.id,
-                      selectedConversationId: null,
-                    };
-                  });
+                  getConversations(inboxItem.id);
                 }}
               >
                 <span className='pr-2'>
@@ -89,4 +89,4 @@ const InboxList = () => {
   );
 };
 
-export default InboxList;
+export default React.memo(InboxList);

@@ -1,7 +1,14 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import {
   ChildrenComponentProps,
   Conversation,
+  ConversationDetail,
   DashBoardState,
   IconKey,
   Inbox,
@@ -10,6 +17,9 @@ import { useAuthContext } from '../utils/auth/AuthProvider';
 import { FaTelegram } from 'react-icons/fa';
 import { MdOutlineMail } from 'react-icons/md';
 import { TbWorldWww } from 'react-icons/tb';
+import React from 'react';
+import { WEBSOCKET_EVENTS } from '../enums/enums';
+import { environment } from '../environments/environment';
 
 const DashboardContext = createContext<null | any>(null);
 const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
@@ -26,9 +36,13 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     messageSeenId: null,
     showInboxes: false,
     searchedMessageId: null,
+    assigneeType: 'Mine',
   });
+  const [messages, setMessages] = useState<any | null>(null);
   const [inboxList, setInboxList] = useState([]);
   const [conversationList, setConversationList] = useState<any>([]);
+  const [conversationDetail, setConversationDetail] =
+    useState<null | ConversationDetail>(null);
 
   const icons = {
     Telegram: <FaTelegram />,
@@ -36,26 +50,45 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     WebWidget: <TbWorldWww />,
   };
 
+  const getConversationDetails = useCallback(
+    (conversationId: number): undefined | ConversationDetail => {
+      const conversation: Conversation = conversationList.find(
+        (conversation: Conversation) => conversation.id === conversationId
+      );
+      const inbox: any = inboxList.find(
+        (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
+      );
+      if (conversation && inbox) {
+        return {
+          inbox_name: inbox?.name,
+          channel_type: conversation?.meta.channel.slice(9),
+          conversation_status: conversation?.status,
+        };
+      }
+    },
+    [conversationList, inboxList]
+  );
+
+  useEffect(() => {
+    if (!dashBoardState.selectedConversationId) return;
+    const conversationDetail = getConversationDetails(
+      dashBoardState.selectedConversationId
+    );
+    if (conversationDetail) {
+      setConversationDetail(conversationDetail);
+    }
+  }, [
+    conversationList,
+    dashBoardState.selectedConversationId,
+    getConversationDetails,
+  ]);
+
   const getIcons = (channel: IconKey): any => {
     return icons[channel] || <FaTelegram />;
   };
 
-  const getConversationDetails = (conversationId: number): any => {
-    const conversation = conversationList.find(
-      (conversation: Conversation) => conversation.id === conversationId
-    );
-    const inbox: any = inboxList.find(
-      (inbox: Inbox) => inbox.id === conversation?.messages[0].inbox_id
-    );
-
-    return {
-      inbox_name: inbox?.name,
-      conversation_status: conversation?.status,
-    };
-  };
-
   useEffect(() => {
-    const webSocket = new WebSocket('ws://localhost:3000/cable');
+    const webSocket = new WebSocket(environment.webSocketUrl);
 
     webSocket.onopen = () => {
       if (webSocket.readyState === webSocket.OPEN) {
@@ -66,9 +99,9 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
       if (
-        (parsedEvent.message?.event === 'message.updated' &&
+        (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_UPDATED &&
           parsedEvent.message?.data.message_type !== 2) ||
-        (parsedEvent.message?.event === 'message.created' &&
+        (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
           parsedEvent.message?.data.message_type === 2)
       ) {
         updateDashboardState((prevState: DashBoardState) => {
@@ -122,15 +155,19 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     <DashboardContext.Provider
       value={{
         dashBoardState,
-        updateDashboardState,
         inboxList,
-        setInboxList,
         conversationList,
+        conversationDetail,
+        messages,
+        updateDashboardState,
+        setInboxList,
         setConversationList,
         getIcons,
         getConversationDetails,
         debounce,
         formatTimePeriod,
+        setConversationDetail,
+        setMessages,
       }}
     >
       {children}
@@ -142,4 +179,4 @@ export const useDashboardContext = () => {
   return useContext(DashboardContext);
 };
 
-export default DashboardProvider;
+export default React.memo(DashboardProvider);
