@@ -7,7 +7,6 @@ import { IoLogoSnapchat } from 'react-icons/io';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
-import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { LuCopy } from 'react-icons/lu';
@@ -26,13 +25,8 @@ type MessageForm = {
 
 const ChatScreen = () => {
   const DashboardContext = useDashboardContext();
-  const {
-    dashBoardState,
-    messages,
-    setMessages,
-    replaceConversation,
-    replaceConversationToTop,
-  } = DashboardContext;
+  const { dashBoardState, messages, setMessages, replaceConversation } =
+    DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
   const accountId = authContext?.getUserDetails().account_id;
@@ -176,16 +170,13 @@ const ChatScreen = () => {
         setMessages((prevData: any) => {
           return { ...prevData, payload: [response.data, ...prevData.payload] };
         });
-        replaceConversationToTop(
-          response.data.conversation_id,
-          response.data.content
-        );
+        updateMessageSeen(true);
         chatContainerRef.current?.scrollTo({
           top: chatContainerRef.current.scrollHeight,
         });
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        toast.error('Something went wrong');
       })
       .finally(() => {
         setIsMessageSending(false);
@@ -193,13 +184,13 @@ const ChatScreen = () => {
     methods.reset();
   };
 
-  const updateMessageSeen = () => {
+  const updateMessageSeen = (isNewMessageSent: null | boolean = null) => {
     httpRequest({
       url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/update_last_seen`,
       method: 'post',
     })
       .then((response) => {
-        replaceConversation(response.data);
+        replaceConversation(response.data, isNewMessageSent);
       })
       .catch((error) => {
         console.error(error);

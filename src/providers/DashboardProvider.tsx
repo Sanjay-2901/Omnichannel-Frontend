@@ -1,24 +1,24 @@
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
   useState,
+  useEffect,
+  useContext,
+  useCallback,
+  createContext,
 } from 'react';
 import {
-  ChildrenComponentProps,
-  Conversation,
-  ConversationDetail,
-  DashBoardState,
-  IconKey,
   Inbox,
+  IconKey,
+  Conversation,
+  DashBoardState,
+  ConversationDetail,
+  ChildrenComponentProps,
 } from '../shared/models/shared.model';
 import { useAuthContext } from '../utils/auth/AuthProvider';
 import { FaTelegram } from 'react-icons/fa';
 import { MdOutlineMail } from 'react-icons/md';
 import { TbWorldWww } from 'react-icons/tb';
 import React from 'react';
-import { WEBSOCKET_EVENTS } from '../enums/enums';
+import { MESSAGE_TYPE, WEBSOCKET_EVENTS } from '../enums/enums';
 import { environment } from '../environments/environment';
 
 const DashboardContext = createContext<null | any>(null);
@@ -69,39 +69,23 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     [conversationList, inboxList]
   );
 
-  const replaceConversation = (conversation: Conversation): void => {
+  const replaceConversation = (
+    conversation: Conversation,
+    isNewMessageSent: null | boolean = null
+  ): void => {
     setConversationList((prevState: Conversation[]) => {
       const index = prevState.findIndex((conversationItem: Conversation) => {
         return conversationItem.id === conversation.id;
       });
-      if (index !== 1) {
-        const newList = [...prevState];
-        newList[index] = conversation;
-        return newList;
-      } else {
-        return prevState;
-      }
-    });
-  };
-
-  const replaceConversationToTop = (
-    conversationId: number,
-    newContent: string
-  ) => {
-    setConversationList((prevState: Conversation[]) => {
-      const index = prevState.findIndex((conversationItem: Conversation) => {
-        return conversationItem.id === conversationId;
-      });
-      if (index !== -1) {
-        const newList = [...prevState];
-        const conversationToUpdate = { ...newList[index] };
-        conversationToUpdate.last_non_activity_message.content = newContent;
+      if (index === -1) return prevState;
+      const newList = [...prevState];
+      if (isNewMessageSent) {
         newList.splice(index, 1);
-        newList.unshift(conversationToUpdate);
-        return newList;
+        newList.unshift(conversation);
       } else {
-        return prevState;
+        newList[index] = conversation;
       }
+      return newList;
     });
   };
 
@@ -135,10 +119,16 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
       if (
+        !parsedEvent ||
+        parsedEvent.message?.data?.message_type === MESSAGE_TYPE.SENT
+      )
+        return;
+      if (
         (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_UPDATED &&
-          parsedEvent.message?.data.message_type !== 2) ||
+          parsedEvent.message?.data.message_type !==
+            MESSAGE_TYPE.INFORMATION) ||
         (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
-          parsedEvent.message?.data.message_type === 2)
+          parsedEvent.message?.data.message_type === MESSAGE_TYPE.INFORMATION)
       ) {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, receivedMessage: parsedEvent.message.data };
@@ -205,7 +195,6 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         setConversationDetail,
         setMessages,
         replaceConversation,
-        replaceConversationToTop,
       }}
     >
       {children}
