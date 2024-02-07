@@ -322,3 +322,10 @@ interface Agent {
   name: string;
   role: string;
 }
+
+export interface ConversationsCount {
+  mine_count: number;
+  assigned_count: number;
+  unassigned_count: number;
+  all_count: number;
+}

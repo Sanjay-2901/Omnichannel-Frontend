@@ -4,6 +4,7 @@ import { httpRequest } from '../../../utils/axios-utils';
 import { useDashboardContext } from '../../../providers/DashboardProvider';
 import {
   Conversation,
+  ConversationsCount,
   DashBoardState,
 } from '../../../shared/models/shared.model';
 import { HiBars3CenterLeft } from 'react-icons/hi2';
@@ -25,6 +26,13 @@ const ConversationsList = () => {
   const navigate = useNavigate();
   const assigneeTypeButtons = ['Mine', 'Unassigned', 'All'];
   const [isConversationsLoading, setIsConversationsLoading] = useState(false);
+  const [conversationsCount, setConversationsCount] =
+    useState<ConversationsCount>({
+      mine_count: 0,
+      assigned_count: 0,
+      unassigned_count: 0,
+      all_count: 0,
+    });
 
   useEffect(() => {
     setIsConversationsLoading(true);
@@ -44,6 +52,7 @@ const ConversationsList = () => {
     })
       .then((response) => {
         setConversationList(response.data.data.payload);
+        setConversationsCount(response.data.data.meta);
       })
       .catch((error) => {
         console.error(error);
@@ -128,15 +137,21 @@ const ConversationsList = () => {
                   className={`${
                     dashBoardState.assigneeType === buttonName &&
                     'text-[#369eff] border-b-2 border-[#369eff]'
-                  } mr-4 pb-1`}
+                  } mr-4 pb-1 flex cursor-pointer`}
+                  onClick={() => {
+                    changeAssigneeType(buttonName);
+                  }}
                 >
-                  <button
-                    onClick={() => {
-                      changeAssigneeType(buttonName);
-                    }}
-                  >
-                    {buttonName}
-                  </button>
+                  <span>{buttonName}</span>
+                  <div className='ml-1 bg-[#26292b] w-6 flex justify-center items-center rounded-md font-semibold'>
+                    <span>
+                      {index === 0
+                        ? conversationsCount?.mine_count
+                        : index === 1
+                        ? conversationsCount?.unassigned_count
+                        : conversationsCount?.all_count}
+                    </span>
+                  </div>
                 </div>
               );
             })}
