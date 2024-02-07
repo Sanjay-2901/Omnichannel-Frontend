@@ -43,6 +43,7 @@ export interface DashBoardState {
   showInboxes: boolean;
   searchedMessageId: number | null;
   assigneeType: string;
+  newConversationId: number | null;
 }
 
 export interface ConversationDetail {

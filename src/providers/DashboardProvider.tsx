@@ -35,6 +35,7 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
     showInboxes: false,
     searchedMessageId: null,
     assigneeType: 'Mine',
+    newConversationId: null,
   });
   const [messages, setMessages] = useState<any | null>(null);
   const [inboxList, setInboxList] = useState([]);
@@ -118,20 +119,29 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
 
     webSocket.onmessage = (event) => {
       const parsedEvent = JSON.parse(event.data);
+      const messageEvent = parsedEvent.message?.event;
+      const messageType = parsedEvent.message?.data?.message_type;
+      const latestMessage = parsedEvent.message?.data;
+
       if (
         !parsedEvent ||
-        parsedEvent.message?.data?.message_type === MESSAGE_TYPE.SENT
+        (messageType === MESSAGE_TYPE.SENT &&
+          latestMessage.content !== WEBSOCKET_EVENTS.MESSAGE_DELETED)
       )
         return;
+      if (messageType === WEBSOCKET_EVENTS.CONVERSATION_CREATED) {
+        updateDashboardState((prevState: DashBoardState) => {
+          return { ...prevState, newConversationId: latestMessage.id };
+        });
+      }
       if (
-        (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_UPDATED &&
-          parsedEvent.message?.data.message_type !==
-            MESSAGE_TYPE.INFORMATION) ||
-        (parsedEvent.message?.event === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
-          parsedEvent.message?.data.message_type === MESSAGE_TYPE.INFORMATION)
+        (messageEvent === WEBSOCKET_EVENTS.MESSAGE_UPDATED &&
+          messageType !== MESSAGE_TYPE.INFORMATION) ||
+        (messageEvent === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
+          messageType === MESSAGE_TYPE.INFORMATION)
       ) {
         updateDashboardState((prevState: DashBoardState) => {
-          return { ...prevState, receivedMessage: parsedEvent.message.data };
+          return { ...prevState, receivedMessage: latestMessage };
         });
       }
     };
