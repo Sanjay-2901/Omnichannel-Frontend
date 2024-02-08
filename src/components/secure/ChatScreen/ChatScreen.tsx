@@ -285,7 +285,8 @@ const ChatScreen = () => {
                       className={`flex relative ${
                         receivedMessageType === 0
                           ? 'self-start'
-                          : receivedMessageType === 1
+                          : receivedMessageType === 1 ||
+                            receivedMessageType === 3
                           ? 'self-end flex-row-reverse'
                           : 'self-center'
                       }`}
@@ -294,7 +295,8 @@ const ChatScreen = () => {
                         className={`mt-2 ${
                           receivedMessageType === 0
                             ? 'bg-gray-300  text-dark rounded-r-lg mr-2 p-2'
-                            : receivedMessageType === 1
+                            : receivedMessageType === 1 ||
+                              receivedMessageType === 3
                             ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
                             : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
                         } rounded-t-md whitespace-normal`}
