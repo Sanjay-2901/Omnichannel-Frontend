@@ -7,7 +7,6 @@ import { IoLogoSnapchat } from 'react-icons/io';
 import { IoSendSharp } from 'react-icons/io5';
 import { useForm } from 'react-hook-form';
 import './ChatScreen.scss';
-import { DashBoardState } from '../../../shared/models/shared.model';
 import { HiOutlineDotsVertical } from 'react-icons/hi';
 import { RiDeleteBin6Line } from 'react-icons/ri';
 import { LuCopy } from 'react-icons/lu';
@@ -26,7 +25,7 @@ type MessageForm = {
 
 const ChatScreen = () => {
   const DashboardContext = useDashboardContext();
-  const { dashBoardState, updateDashboardState, messages, setMessages } =
+  const { dashBoardState, messages, setMessages, replaceConversation } =
     DashboardContext;
   const { selectedConversationId } = dashBoardState;
   const authContext = useAuthContext();
@@ -171,30 +170,27 @@ const ChatScreen = () => {
         setMessages((prevData: any) => {
           return { ...prevData, payload: [response.data, ...prevData.payload] };
         });
-        setIsMessageSending(false);
-        updateDashboardState((prevState: DashBoardState) => {
-          return { ...prevState, postedMessageId: response.data.id };
-        });
+        updateMessageSeen(true);
         chatContainerRef.current?.scrollTo({
           top: chatContainerRef.current.scrollHeight,
         });
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        toast.error('Something went wrong');
+      })
+      .finally(() => {
         setIsMessageSending(false);
       });
     methods.reset();
   };
 
-  const updateMessageSeen = () => {
+  const updateMessageSeen = (isNewMessageSent: null | boolean = null) => {
     httpRequest({
       url: `api/v1/accounts/${accountId}/conversations/${selectedConversationId}/update_last_seen`,
       method: 'post',
     })
       .then((response) => {
-        updateDashboardState((prevState: DashBoardState) => {
-          return { ...prevState, messageSeenId: response.data.id };
-        });
+        replaceConversation(response.data, isNewMessageSent);
       })
       .catch((error) => {
         console.error(error);
@@ -289,7 +285,8 @@ const ChatScreen = () => {
                       className={`flex relative ${
                         receivedMessageType === 0
                           ? 'self-start'
-                          : receivedMessageType === 1
+                          : receivedMessageType === 1 ||
+                            receivedMessageType === 3
                           ? 'self-end flex-row-reverse'
                           : 'self-center'
                       }`}
@@ -298,7 +295,8 @@ const ChatScreen = () => {
                         className={`mt-2 ${
                           receivedMessageType === 0
                             ? 'bg-gray-300  text-dark rounded-r-lg mr-2 p-2'
-                            : receivedMessageType === 1
+                            : receivedMessageType === 1 ||
+                              receivedMessageType === 3
                             ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
                             : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
                         } rounded-t-md whitespace-normal`}

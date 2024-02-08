@@ -40,11 +40,10 @@ export interface DashBoardState {
   selectedInboxId: number | null;
   selectedConversationId: number | null;
   receivedMessage: WebSocketMessage | null;
-  postedMessageId: number | null;
-  messageSeenId: number | null;
   showInboxes: boolean;
   searchedMessageId: number | null;
   assigneeType: string;
+  newConversationId: number | null;
 }
 
 export interface ConversationDetail {
@@ -322,4 +321,11 @@ interface Agent {
   email: string;
   name: string;
   role: string;
+}
+
+export interface ConversationsCount {
+  mine_count: number;
+  assigned_count: number;
+  unassigned_count: number;
+  all_count: number;
 }
