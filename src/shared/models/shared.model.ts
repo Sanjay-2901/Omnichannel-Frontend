@@ -329,3 +329,36 @@ export interface ConversationsCount {
   unassigned_count: number;
   all_count: number;
 }
+
+export interface ChatMessage {
+  id: number;
+  content: any;
+  inbox_id: number;
+  conversation_id: number;
+  message_type: number;
+  content_type: string;
+  status: string;
+  content_attributes: object | any;
+  created_at: number;
+  private: boolean;
+  source_id: any;
+  sender: {
+    id: number;
+    name: string;
+    available_name: string;
+    avatar_url: string;
+    type: string;
+    availability_status: string;
+    thumbnail: string;
+  };
+  attachments?: {
+    id: number;
+    message_id: number;
+    file_type: string;
+    account_id: number;
+    extension: string | null;
+    data_url: string;
+    thumb_url: string;
+    file_size: number;
+  }[];
+}

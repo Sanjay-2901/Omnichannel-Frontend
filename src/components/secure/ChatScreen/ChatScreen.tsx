@@ -18,6 +18,8 @@ import {
   SUCCESS_TOAST_TOP_CONFIG,
 } from '../../../constants/constants';
 import ChatScreenHeader from '../ChatScreenHeader/ChatScreenHeader';
+import { ChatMessage } from '../../../shared/models/shared.model';
+import { MESSAGE_TYPE } from '../../../enums/enums';
 
 type MessageForm = {
   message: string;
@@ -143,8 +145,8 @@ const ChatScreen = () => {
           scrollToBottom();
         }
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        toast.error('Something went wrong');
       });
   };
 
@@ -277,32 +279,45 @@ const ChatScreen = () => {
                   </small>
                 }
               >
-                {messages.payload.map((message: any) => {
+                {messages.payload.map((message: ChatMessage) => {
                   const receivedMessageType = message.message_type;
+                  const fileType =
+                    message.attachments && message.attachments[0].file_type;
                   return (
                     <div
                       key={message.id}
                       className={`flex relative ${
-                        receivedMessageType === 0
+                        receivedMessageType === MESSAGE_TYPE.RECEIVED
                           ? 'self-start'
-                          : receivedMessageType === 1 ||
-                            receivedMessageType === 3
+                          : receivedMessageType === MESSAGE_TYPE.SENT ||
+                            receivedMessageType === MESSAGE_TYPE.AUTO
                           ? 'self-end flex-row-reverse'
                           : 'self-center'
-                      }`}
+                      } ${fileType === 'image' && 'img-cont w-60'}`}
                     >
                       <div
                         className={`mt-2 ${
-                          receivedMessageType === 0
+                          receivedMessageType === MESSAGE_TYPE.RECEIVED
                             ? 'bg-gray-300  text-dark rounded-r-lg mr-2 p-2'
-                            : receivedMessageType === 1 ||
-                              receivedMessageType === 3
+                            : receivedMessageType === MESSAGE_TYPE.SENT ||
+                              receivedMessageType === MESSAGE_TYPE.AUTO
                             ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
                             : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
-                        } rounded-t-md whitespace-normal`}
+                        } rounded-t-md whitespace-normal flex flex-col justify-between`}
                       >
-                        <p className='m-0'>{message.content}</p>
-                        <small className='text-xs'>
+                        {message.content && (
+                          <p className='m-0'>{message.content}</p>
+                        )}
+                        {message.attachments && fileType === 'image' && (
+                          <div>
+                            <img
+                              src={message.attachments[0].data_url}
+                              alt='shared-img'
+                            />
+                          </div>
+                        )}
+
+                        <small className='text-xs mt-1'>
                           {new Intl.DateTimeFormat('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -313,7 +328,7 @@ const ChatScreen = () => {
                         </small>
                       </div>
                       {!message.content_attributes?.deleted &&
-                        receivedMessageType !== 2 && (
+                        receivedMessageType !== MESSAGE_TYPE.INFORMATION && (
                           <div
                             className='cursor-pointer hover:bg-[#787f85] self-end p-1 rounded-sm message'
                             onClick={() => {
@@ -326,7 +341,9 @@ const ChatScreen = () => {
                       {showMessageOptions === message.id && (
                         <div
                           className={`bg-[#151718] py-2 rounded-md absolute -bottom-0 z-10 w-28 ${
-                            receivedMessageType === 0 ? 'right-0' : 'left-0'
+                            receivedMessageType === MESSAGE_TYPE.RECEIVED
+                              ? 'right-0'
+                              : 'left-0'
                           }`}
                         >
                           <ul className='p-0 m-0'>

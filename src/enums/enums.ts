@@ -9,4 +9,5 @@ export enum MESSAGE_TYPE {
   RECEIVED = 0,
   SENT = 1,
   INFORMATION = 2,
+  AUTO = 3,
 }
