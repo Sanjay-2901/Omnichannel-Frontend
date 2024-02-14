@@ -145,8 +145,8 @@ const ChatScreen = () => {
           scrollToBottom();
         }
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        toast.error('Something went wrong');
       });
   };
 
@@ -293,7 +293,7 @@ const ChatScreen = () => {
                             receivedMessageType === MESSAGE_TYPE.AUTO
                           ? 'self-end flex-row-reverse'
                           : 'self-center'
-                      } ${fileType === 'image' && 'h-60 w-60'}`}
+                      } ${fileType === 'image' && 'img-cont w-60'}`}
                     >
                       <div
                         className={`mt-2 ${
@@ -303,9 +303,11 @@ const ChatScreen = () => {
                               receivedMessageType === MESSAGE_TYPE.AUTO
                             ? 'bg-blue-500  rounded-l-lg ml-2 p-2'
                             : 'bg-[#687076] flex items-center gap-2 rounded-md p-1'
-                        } rounded-t-md whitespace-normal`}
+                        } rounded-t-md whitespace-normal flex flex-col justify-between`}
                       >
-                        <p className='m-0'>{message.content}</p>
+                        {message.content && (
+                          <p className='m-0'>{message.content}</p>
+                        )}
                         {message.attachments && fileType === 'image' && (
                           <div>
                             <img
@@ -315,7 +317,7 @@ const ChatScreen = () => {
                           </div>
                         )}
 
-                        <small className='text-xs'>
+                        <small className='text-xs mt-1'>
                           {new Intl.DateTimeFormat('en-US', {
                             month: 'short',
                             day: 'numeric',

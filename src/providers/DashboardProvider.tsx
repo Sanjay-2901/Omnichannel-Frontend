@@ -138,7 +138,9 @@ const DashboardProvider: React.FC<ChildrenComponentProps> = ({ children }) => {
         (messageEvent === WEBSOCKET_EVENTS.MESSAGE_UPDATED &&
           messageType !== MESSAGE_TYPE.INFORMATION) ||
         (messageEvent === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
-          messageType === MESSAGE_TYPE.INFORMATION)
+          messageType === MESSAGE_TYPE.INFORMATION) ||
+        (messageEvent === WEBSOCKET_EVENTS.MESSAGE_CREATED &&
+          latestMessage.hasOwnProperty('attachments'))
       ) {
         updateDashboardState((prevState: DashBoardState) => {
           return { ...prevState, receivedMessage: latestMessage };
